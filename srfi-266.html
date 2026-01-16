@@ -46,7 +46,7 @@ readability of Scheme programs.</p>
 their code the gap between what they learnt at school for expressing
 arithmetic formulae and what is written in Scheme.</p>
 
-<p>Here is an example of scheme for computing the root of a quadratic.</p>
+<p>Here is an example of Scheme for computing the root of a quadratic.</p>
 
 <code>
 <pre>
@@ -56,7 +56,7 @@ arithmetic formulae and what is written in Scheme.</p>
 </pre>
 </code>
 
-<p>Even experimented scheme programmers may have trouble to validate
+<p>Even experimented Scheme programmers may have trouble to validate
 even a such simple expression. What to say for complex expressions written
 by someone else. As an example, here is a challenging quiz, can you guess
 what <code>k</code> is representing (answer later in the text) ?</p>
@@ -68,7 +68,7 @@ what <code>k</code> is representing (answer later in the text) ?</p>
 </code>
 
 <p>This SRFI describes the syntax <code class="expr-keyword">expr</code> that fills the gap between
-scheme and mathematics, at least for arithmetic. Using this syntax, the above
+Scheme and mathematics, at least for arithmetic. Using this syntax, the above
 examples can be written as below:</p>
 
 <code>
@@ -114,7 +114,7 @@ instead of:
 <p><i><b>SUBJECT TO DISCUSSION</b> Neither bitwise operations nor fixnum
 operation are presented in this first draft because these features are
 not part of R7RS-small. Also it has to be noted that C-like operators
-can not be used because the vertical bar | is trapped in scheme.</i></p>
+can not be used because the vertical bar | is trapped in Scheme.</i></p>
 
 <p>Moreover, mathematical formulae can deal with objects that are
 not numbers but vectors, matrices, monoid elements, ... For this
@@ -125,7 +125,7 @@ computing.</p>
 the ability to write expressions in a more usual way. The current SRFI
 differs for the the following reasons:</p>
 <ul>
-<li>it is standard scheme and does not require special parsing feature;</li>
+<li>it is standard Scheme and does not require special parsing feature;</li>
 <li>it is more flexible because it has no enforcement on operator usage;</li>
 <li>it is simpler to understand by programmers coming from other languages.</li>
 </ul>
@@ -233,7 +233,7 @@ But at the moment, reasoning on grammar has advantages.</i></p>
 not in the production of the above grammar.</p>
 
 <p>Application of the syntax <code class="expr-keyword">expr</code> should transform the expression
-to an optimal scheme expression. It means that using <code class="expr-keyword">expr</code> has
+to an optimal Scheme expression. It means that using <code class="expr-keyword">expr</code> has
 no runtime cost.</p>
 
 <p>For example:</p>
@@ -248,7 +248,7 @@ no runtime cost.</p>
 <h2 id="implementation">Implementation</h2>
 
 <p>Implementation of syntactic item <code class="expr-keyword">expr</code> can be made in many ways:
-using standard scheme macros, using implementation specific macros, or,
+using standard Scheme macros, using implementation specific macros, or,
 using internals of implementation.</p>
 
 <p>The sample implementation given here use the above grammar to
