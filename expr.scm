@@ -1,4 +1,4 @@
-(define-library (srfi NNN)
+(define-library (srfi 266)
 
   (export expr)
   (import (scheme base))
