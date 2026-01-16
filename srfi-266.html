@@ -227,20 +227,20 @@ grammar below:
      (x                          -&gt; x))
 </code></pre>
 
-<p id="grammar"><i><b>SUBJECT TO DISCUSSION</b>The above grammar is subject to change
+<p id="grammar"><i><b>SUBJECT TO DISCUSSION</b> The grammar above is subject to change
 according to the discussion. It is not currently explained in any way.
 The explanation could be done later if needed and if that kind of formalism
 is of interest. At the moment, it is expected that readers can understand
 such grammar or at least guess how it works.
 For example, it may be better to just supply an array of the operation
 with their priority and some rules around these priorities.
-But at the moment, reasoning on grammar has advantages.</i></p>
+But at the moment, reasoning based on a grammar has advantages.</i></p>
 
-<p>It is an error to not provide an expression <b>E ...</b> that is
-not in the production of the above grammar.</p>
+<p>It is an error to provide an expression <b>E ...</b> that is
+not in the production of the grammar above.</p>
 
 <p>Application of the syntax <code class="expr-keyword">expr</code> should transform the expression
-to an optimal Scheme expression. It means that using <code class="expr-keyword">expr</code> has
+to an optimal Scheme expression so that using <code class="expr-keyword">expr</code> has
 no runtime cost.</p>
 
 <p>For example:</p>
@@ -258,8 +258,8 @@ no runtime cost.</p>
 using standard Scheme macros, using implementation specific macros, or,
 using internals of implementation.</p>
 
-<p>The sample implementation given here use the above grammar to
-produce R7RS-small macros.</p>
+<p>The sample implementation given here uses the above grammar to
+produce R7RS-Small macros.</p>
 
 <a href="https://srfi.schemers.org/srfi-266/">Source for the sample implementation.</a>
 
