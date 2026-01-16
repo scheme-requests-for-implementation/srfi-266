@@ -9,7 +9,14 @@ SPDX-License-Identifier: MIT
     <title>SRFI 266: The expr syntax</title>
     <link href="favicon.png" rel="icon" sizes="192x192" type="image/png">
     <link rel="stylesheet" href="https://srfi.schemers.org/srfi.css" type="text/css">
-    <meta name="viewport" content="width=device-width, initial-scale=1"></head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+code.expr-keyword {
+  font-weight: bold;
+  font-family: sans-serif;
+}
+    </style>
+</head>
   <body>
     <h1><a href="https://srfi.schemers.org/"><img class="srfi-logo" src="https://srfi.schemers.org/srfi-logo.svg" alt="SRFI surfboard logo"></a>266: The expr syntax</h1>
 
@@ -25,7 +32,7 @@ The editor will add this section.</p>
 
 <h2 id="abstract">Abstract</h2>
 
-<p>The syntax <b>expr</b> allows to write arithmetic expressions using
+<p>The syntax <code class="expr-keyword">expr</code> allows to write arithmetic expressions using
 a syntax near to mathematical notations, potentially improving
 readability of Scheme programs.</p>
 
@@ -60,7 +67,7 @@ what <code>k</code> is representing (answer later in the text) ?</p>
 </pre>
 </code>
 
-<p>This SRFI describes the syntax <code>expr</code> that fills the gap between
+<p>This SRFI describes the syntax <code class="expr-keyword">expr</code> that fills the gap between
 scheme and mathematics, at least for arithmetic. Using this syntax, the above
 examples can be written as below:</p>
 
@@ -72,7 +79,7 @@ examples can be written as below:</p>
 </pre>
 </code>
 
-<p>The syntax <code>expr</code> is inspired by the eponymous UNIX tool <i>expr</i>.
+<p>The syntax <code class="expr-keyword">expr</code> is inspired by the eponymous UNIX tool <i>expr</i>.
 The expression at its right is expressed using almost standard formulae.
 Using it, the definition of <code>k</code> becomes:</p>
 
@@ -85,7 +92,7 @@ Using it, the definition of <code>k</code> becomes:</p>
 
 <p>Writing arithmetic expressions is common when programming. Writing
 logic expressions and comparison expressions is also
-quiet common. For this reason, the syntax <code>expr</code> comes with
+quiet common. For this reason, the syntax <code class="expr-keyword">expr</code> comes with
 flavours allowing also these expressions. Thus it is possible to write:</p>
 
 <code>
@@ -125,13 +132,13 @@ differs for the the following reasons:</p>
 
 <h2 id="specification">Specification</h2>
 
-<p>This SRFI exports only one syntax item: <b>expr</b>.
+<p>This SRFI exports only one syntax item: <code class="expr-keyword">expr</code>.
 Accordingly to SRFI-261, this syntactic item can be imported
 using:</p>
 
 <p><pre><code>   (import (srfi srfi-266))</code></pre></p>
 
-<p>The syntactic item <b>expr</b> is followed by an infix expression
+<p>The syntactic item <code class="expr-keyword">expr</code> is followed by an infix expression
 whose elements <b><code>E</code></b> are separated by space (except if
 enclosed in braces):</p>
 
@@ -225,8 +232,8 @@ But at the moment, reasoning on grammar has advantages.</i></p>
 <p>It is an error to not provide an expression <b>E ...</b> that is
 not in the production of the above grammar.</p>
 
-<p>Application of the syntax <b>expr</b> should transform the expression
-to an optimal scheme expression. It means that using <b>expr</b> has
+<p>Application of the syntax <code class="expr-keyword">expr</code> should transform the expression
+to an optimal scheme expression. It means that using <code class="expr-keyword">expr</code> has
 no runtime cost.</p>
 
 <p>For example:</p>
@@ -240,7 +247,7 @@ no runtime cost.</p>
 
 <h2 id="implementation">Implementation</h2>
 
-<p>Implementation of syntactic item <b>expr</b> can be made in many ways:
+<p>Implementation of syntactic item <code class="expr-keyword">expr</code> can be made in many ways:
 using standard scheme macros, using implementation specific macros, or,
 using internals of implementation.</p>
 
