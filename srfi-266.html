@@ -26,8 +26,8 @@ The editor will add this section.</p>
 <h2 id="abstract">Abstract</h2>
 
 <p>The syntax <b>expr</b> allows to write arithmetic expressions using
-a syntax near to mathematical notations, potentialy improving
-readability of scheme programs.</p>
+a syntax near to mathematical notations, potentially improving
+readability of Scheme programs.</p>
 
 <h2 id="issues">Issues</h2>
 
@@ -35,9 +35,9 @@ readability of scheme programs.</p>
 
 <h2 id="rationale">Rationale</h2>
 
-<p>Scheme programmers expressing arithmetic expression see all low
-their code the gap between what they learnt at school for expessing
-arithmetic formulae and what is written in scheme.</p>
+<p>Scheme programmers expressing arithmetic expression see all over
+their code the gap between what they learnt at school for expressing
+arithmetic formulae and what is written in Scheme.</p>
 
 <p>Here is an example of scheme for computing the root of a quadratic.</p>
 
@@ -51,7 +51,7 @@ arithmetic formulae and what is written in scheme.</p>
 
 <p>Even experimented scheme programmers may have trouble to validate
 even a such simple expression. What to say for complex expressions written
-by someone else. As an example, here is a chalenging quizz, can you guess
+by someone else. As an example, here is a challenging quiz, can you guess
 what <code>k</code> is representing (answer later in the text) ?</p>
 
 <code>
@@ -61,8 +61,8 @@ what <code>k</code> is representing (answer later in the text) ?</p>
 </code>
 
 <p>This SRFI describes the syntax <code>expr</code> that fills the gap between
-scheme and mathematic, at least for arithmetic. Using this syntax, the above
-exemples can be written as below:</p>
+scheme and mathematics, at least for arithmetic. Using this syntax, the above
+examples can be written as below:</p>
 
 <code>
 <pre>
@@ -72,7 +72,7 @@ exemples can be written as below:</p>
 </pre>
 </code>
 
-<p>The syntax <code>expr</code> is inspired by the eponym UNIX tool <i>expr</i>.
+<p>The syntax <code>expr</code> is inspired by the eponymous UNIX tool <i>expr</i>.
 The expression at its right is expressed using almost standard formulae.
 Using it, the definition of <code>k</code> becomes:</p>
 
@@ -83,7 +83,7 @@ Using it, the definition of <code>k</code> becomes:</p>
 </pre>
 </code>
 
-<p>Writing arithmetic expressions is common when programming. Writting
+<p>Writing arithmetic expressions is common when programming. Writing
 logic expressions and comparison expressions is also
 quiet common. For this reason, the syntax <code>expr</code> comes with
 flavours allowing also these expressions. Thus it is possible to write:</p>
@@ -109,8 +109,8 @@ operation are presented in this first draft because these features are
 not part of R7RS-small. Also it has to be noted that C-like operators
 can not be used because the vertical bar | is trapped in scheme.</i></p>
 
-<p>Moreover, mathematic formulae can deal with objects that are
-not numbers but vectors, matrices, monoïd elements, ... For this
+<p>Moreover, mathematical formulae can deal with objects that are
+not numbers but vectors, matrices, monoid elements, ... For this
 reason, this SRFI includes definition of operators for on purpose
 computing.</p>
 
@@ -126,12 +126,12 @@ differs for the the following reasons:</p>
 <h2 id="specification">Specification</h2>
 
 <p>This SRFI exports only one syntax item: <b>expr</b>.
-Accordingly to SRFI-261, this syntaxic item can be imported
+Accordingly to SRFI-261, this syntactic item can be imported
 using:</p>
 
 <p><pre><code>   (import (srfi srfi-266))</code></pre></p>
 
-<p>The syntaxic item <b>expr</b> is followed by an infix expression
+<p>The syntactic item <b>expr</b> is followed by an infix expression
 whose elements <b><code>E</code></b> are separated by space (except if
 enclosed in braces):</p>
 
@@ -225,7 +225,7 @@ But at the moment, reasoning on grammar has advantages.</i></p>
 <p>It is an error to not provide an expression <b>E ...</b> that is
 not in the production of the above grammar.</p>
 
-<p>Application of the syntax <b>expr</b> shoiuld transform the expression
+<p>Application of the syntax <b>expr</b> should transform the expression
 to an optimal scheme expression. It means that using <b>expr</b> has
 no runtime cost.</p>
 
@@ -240,11 +240,11 @@ no runtime cost.</p>
 
 <h2 id="implementation">Implementation</h2>
 
-<p>Implementation of syntaxic item <b>expr</b> can be made in many ways:
+<p>Implementation of syntactic item <b>expr</b> can be made in many ways:
 using standard scheme macros, using implementation specific macros, or,
 using internals of implementation.</p>
 
-<p>The sample implementation given here use the above agrammar to
+<p>The sample implementation given here use the above grammar to
 produce R7RS-small macros.</p>
 
 <a href="https://srfi.schemers.org/srfi-266/">Source for the sample implementation.</a>
