@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>SRFI ###: The expr syntax</title>
+    <link href="https://srfi.schemers.org/favicon.png" rel="icon" sizes="192x192" type="image/png">
+    <link rel="stylesheet" href="SRFI-expr_fichiers/srfi.css" type="text/css">
+    <meta name="viewport" content="width=device-width, initial-scale=1"></head>
+  <body>
+    <h1><a href="https://srfi.schemers.org/"><img class="srfi-logo" src="SRFI-expr_fichiers/srfi-logo.svg" alt="SRFI surfboard logo"></a>###: The expr syntax</h1>
+
+<p>by José Bollo</p>
+
+<h2 id="status">Status</h2>
+
+<p style="color: red;">For editor's use only.  Please do not edit this section.</p>
+
+<p>??? the draft/final/withdrawn status of the SRFI, information on how
+to subscribe to its mailing list, and important dates in its history.
+The editor will add this section.</p>
+
+<h2 id="abstract">Abstract</h2>
+
+<p>The syntax <b>expr</b> allows to write arithmetic expressions using
+a syntax near to mathematical notations, potentialy improving
+readability of scheme programs.</p>
+
+<h2 id="issues">Issues</h2>
+
+<p>When implemented using macros, error reports may be difficult to express.</p>
+
+<h2 id="rationale">Rationale</h2>
+
+<p>Scheme programmers expressing arithmetic expression see all low
+their code the gap between what they learnt at school for expessing
+arithmetic formulae and what is written in scheme.</p>
+
+<p>Here is an example of scheme for computing the root of a quadratic.</p>
+
+<code>
+<pre>
+	(let ((rdelta (sqrt (- (* b b) (* 4 a c)))))
+           (values (/ (- rdelta b) 2 a)
+                   (/ (+ rdelta b) -2 a)))
+</pre>
+</code>
+
+<p>Even experimented scheme programmers may have trouble to validate
+even a such simple expression. What to say for complex expressions written
+by someone else. As an example, here is a chalenging quizz, can you guess
+what <code>k</code> is representing (answer later in the text) ?</p>
+
+<code>
+<pre>
+   (define k (- (quotient (+ (abs (- (* dark 20) (* total 10))) total -1) total) 1))
+</pre>
+</code>
+
+<p>This SRFI describes the syntax <code>expr</code> that fills the gap between
+scheme and mathematic, at least for arithmetic. Using this syntax, the above
+exemples can be written as below:</p>
+
+<code>
+<pre>
+   (let ((rdelta (sqrt (expr b * b - 4 * a * c))))
+           (values (expr (- b + rdelta) / (2 * a))
+                   (expr (- b - rdelta) / (2 * a))))
+</pre>
+</code>
+
+<p>The syntax <code>expr</code> is inspired by the eponym UNIX tool <i>expr</i>.
+The expression at its right is expressed using almost standard formulae.
+Using it, the definition of <code>k</code> becomes:</p>
+
+<code>
+<pre>
+   ; Compute the smallest integer k >= 0 such that (45-5k)% <= dark/total <= (55+5k)%
+   (define k (expr ((((abs dark)) * 20 - total * 10) + total - 1) : total - 1))
+</pre>
+</code>
+
+<p>Writing arithmetic expressions is common when programming. Writting
+logic expressions and comparison expressions is also
+quiet common. For this reason, the syntax <code>expr</code> comes with
+flavours allowing also these expressions. Thus it is possible to write:</p>
+
+<code>
+<pre>
+   (if (expr a < 0 and (k or b + c <> 9)))
+      ...
+</pre>
+</code>
+
+instead of:
+
+<code>
+<pre>
+   (if (and (< a 0) (or k (not (= (+ b c) 9))))
+      ...
+</pre>
+</code>
+
+<p><i><b>SUBJECT TO DISCUSSION</b> Neither bitwise operations nor fixnum
+operation are presented in this first draft because these features are
+not part of R7RS-small. Also it has to be noted that C-like operators
+can not be used because the vertical bar | is trapped in scheme.</i></p>
+
+<p>Moreover, mathematic formulae can deal with objects that are
+not numbers but vectors, matrices, monoïd elements, ... For this
+reason, this SRFI includes definition of operators for on purpose
+computing.</p>
+
+<p>The SRFI-105, <i>Curly-infix-expressions</i>, already introduced
+the ability to write expressions in a more usual way. The current SRFI
+differs for the the following reasons:</p>
+<ul>
+<li>it is standard scheme and does not require special parsing feature;</li>
+<li>it is more flexible because it has no enforcement on operator usage;</li>
+<li>it is simpler to understand by programmers coming from other languages.</li>
+</ul>
+
+<h2 id="specification">Specification</h2>
+
+<p>This SRFI exports only one syntax item: <b>expr</b>.
+Accordingly to SRFI-261, this syntaxic item can be imported
+using:</p>
+
+<p><pre><code>   (import (srfi srfi-NNN))</code></pre></p>
+
+<p>The syntaxic item <b>expr</b> is followed by an infix expression
+whose elements <b><code>E</code></b> are separated by space (except if
+enclosed in braces):</p>
+
+<p><pre><code>   (expr E ...)</code></pre></p>
+
+The expression <b><code>E ...</code></b> must satisfy the
+below grammar:
+
+<pre><code>
+
+   (EXPR
+     (COND                       -&gt; $1))
+   (COND
+     (OR "if" OR "else" OR       -&gt; ("if" $3 $1 $5))
+     (OR                         -&gt; $1))
+   (OR
+     (AND (+ "or" AND)           -&gt; ("or" $1 . $2))
+     (AND                        -&gt; $1))
+   (AND
+     (IMPLIES (+ "and" IMPLIES)  -&gt; ("and" $1 . $2))
+     (IMPLIES                    -&gt; $1))
+   (IMPLIES
+     (EQV "implies" EQV          -&gt; ("or" ("not" $1) $3))
+     (EQV                        -&gt; $1))
+   (EQV
+     (NOT "not" "eqv" NOT        -&gt; ("not" ("eqv?" $1 $4)))
+     (NOT "eqv" NOT              -&gt; ("eqv?" $1 $3))
+     (NOT                        -&gt; $1))
+   (NOT
+     ("not" NOT                  -&gt; ("not" $2))
+     (COMP                       -&gt; $1))
+   (COMP
+     (SUM (+ "&lt;"  SUM)           -&gt; ("&lt;" $1 . $2))
+     (SUM (+ "&lt;=" SUM)           -&gt; ("&lt;=" $1 . $2))
+     (SUM (+ "&gt;"  SUM)           -&gt; ("&gt;" $1 . $2))
+     (SUM (+ "&gt;=" SUM)           -&gt; ("&gt;=" $1 . $2))
+     (SUM "="  SUM               -&gt; ("=" $1 $3))
+     (SUM "&lt;&gt;" SUM               -&gt; ("not" ("=" $1 $3)))
+     (SUM                        -&gt; $1))
+   (SUM
+     (DIFF (+ "+" DIFF)          -&gt; ("+" $1 . $2))
+     (DIFF                       -&gt; $1))
+   (DIFF
+     (FACTOR (+ "-" FACTOR)      -&gt; ("-" $1 . $2))
+     (FACTOR                     -&gt; $1))
+   (FACTOR
+     ("-" FACTOR                 -&gt; ("-" $2))
+     ("+" FACTOR                 -&gt; $2)
+     (MUL                        -&gt; $1))
+   (MUL
+     (DIV (+ "*" DIV)            -&gt; ("*" $1 . $2))
+     (DIV                        -&gt; $1))
+   (DIV
+     (QUOT (+ "/" QUOT)          -&gt; ("/" $1 . $2))
+     (QUOT                       -&gt; $1))
+   (QUOT
+     (QUOT ":" REM               -&gt; ("quotient" $1 $3))
+     (REM                        -&gt; $1))
+   (REM
+     (REM "%" EXP                -&gt; ("remainder" $1 $3))
+     (EXP                        -&gt; $1))
+   (EXP
+     (TERM "^" TERM (+ "^" TERM) -&gt; ("expt" $1 ("*" $3 . $4)))
+     (TERM "^" TERM              -&gt; ("expt" $1 $3))
+     (TERM                       -&gt; $1))
+   (EXPT
+     ("-" EXPT                   -&gt; (- $2))
+     ("+" EXPT                   -&gt; $2)
+     (TERM "^" EXPT              -&gt; ("*" $1 $3))
+     (TERM                       -&gt; $1))
+   (TERM
+     (ITEM "@" ITEM              -&gt; ("vector-ref" $1 $3))
+     (ITEM "@." ITEM             -&gt; ("list-ref" $1 $3))
+     (ITEM "@@" ITEM             -&gt; ("bytevector-u8-ref" $1 $3))
+     (ITEM                       -&gt; $1))
+   (ITEM
+     (((x ...))                  -&gt; (x ...))
+     ((x ...)                    -&gt; ("expr" x ...))
+     (x                          -&gt; x))
+</code></pre>
+
+<p><i><b>SUBJECT TO DISCUSSION</b>The above grammar is subject to change
+accordingly to the discussion. It is not currently explained in any way.
+The explanation could be done later if needed and if that kind of formalism
+is of interest. At the moment, it is expected that readers can understand
+such grammar or at least guess how it works.
+For example, it may be better to just supply an array of the operation
+with their priority and some rules around these priorities.
+But at the moment, reasoning on grammar has advantages.</i></p>
+
+<p>It is an error to not provide an expression <b>E ...</b> that is
+not in the production of the above grammar.</p>
+
+<p>Application of the syntax <b>expr</b> shoiuld transform the expression
+to an optimal scheme expression. It means that using <b>expr</b> has
+no runtime cost.</p>
+
+<p>For example:</p>
+
+<p><pre><code>   (expr a + b + c < d < x - y - z)</code></pre></p>
+
+<p>Must be translated to:</p>
+
+<p><pre><code>   (< (+ a b c) d (- x y z))</code></pre></p>
+
+
+<h2 id="implementation">Implementation</h2>
+
+<p>Implementation of syntaxic item <b>expr</b> can be made in many ways:
+using standard scheme macros, using implementation specific macros, or,
+using internals of implementation.</p>
+
+<p>The sample implementation given here use the above agrammar to
+produce R7RS-small macros.</p>
+
+<a href="https://srfi.schemers.org/srfi-minus-NNN/sample">Source for the sample implementation.</a>
+
+<h2 id="acknowledgements">Acknowledgements</h2>
+
+<p>Many thanks to writers of the UNIX tool <i>expr</i>.</p>
+
+<h2 id="copyright">Copyright</h2>
+<p>© 2026 José Bollo.</p>
+
+<p>
+  Permission is hereby granted, free of charge, to any person
+  obtaining a copy of this software and associated documentation files
+  (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge,
+  publish, distribute, sublicense, and/or sell copies of the Software,
+  and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:</p>
+
+<p>
+  The above copyright notice and this permission notice (including the
+  next paragraph) shall be included in all copies or substantial
+  portions of the Software.</p>
+<p>
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+  BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+  ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.</p>
+
+  <hr>
+  <address>Editor: <a href="mailto:srfi-editors+at+srfi+dot+schemers+dot+org">Arthur A. Gleckler</a></address></body></html>

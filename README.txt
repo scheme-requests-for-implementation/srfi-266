@@ -1,0 +1,13 @@
+The file 'generated-expr.scm' is produced by the file
+'gram-expr.scm'. It can be produced with guile using
+the command:
+
+$ guile --r7rs gram-expr.scm > generated-expr.scm
+
+The program 'test-expr.scm' checks that the produced
+implementation of 'expr' works as expected.
+
+It can be checked with guile using the command:
+
+$ guile --r7rs test-expr.scm
+
