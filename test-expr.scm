@@ -1,3 +1,7 @@
+; SPDX-FileCopyrightText: 2026 José Bollo
+;
+; SPDX-License-Identifier: MIT
+
 (import (scheme base)(scheme write))
 
 (define-syntax expr

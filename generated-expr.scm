@@ -1,5 +1,6 @@
-
-
+; SPDX-FileCopyrightText: 2026 José Bollo
+;
+; SPDX-License-Identifier: MIT
 
 (define-syntax state-0
    (syntax-rules (not - +)

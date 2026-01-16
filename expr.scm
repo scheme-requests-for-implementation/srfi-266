@@ -1,3 +1,7 @@
+; SPDX-FileCopyrightText: 2026 José Bollo
+;
+; SPDX-License-Identifier: MIT
+
 (define-library (srfi 266)
 
   (export expr)
