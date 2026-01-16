@@ -38,8 +38,13 @@ notation, potentially improving the readability of Scheme programs.</p>
 
 <h2 id="issues">Issues</h2>
 
-<p>When <code class="expr-keyword">expr</code> is implemented using
-macros, error reports may be difficult to express.</p>
+<ul>
+  <li>When <code class="expr-keyword">expr</code> is implemented using
+macros, error reports may be difficult to express.</li>
+  <li>Neither bitwise operations nor fixnum operation are present in
+  this first draft because these features are not part of
+  R7RS-small.  See <a href="#bitwise-fixnum">below</a>.</li>
+</ul>
 
 <h2 id="rationale">Rationale</h2>
 
@@ -112,7 +117,7 @@ instead of:
 </pre>
 </code>
 
-<p><i><b>SUBJECT TO DISCUSSION</b> Neither bitwise operations nor fixnum
+<p id="bitwise-fixnum"><i><b>SUBJECT TO DISCUSSION</b> Neither bitwise operations nor fixnum
 operation are present in this first draft because these features are
 not part of R7RS-small. Also, it has to be noted that C-like operators
 cannot be used because the vertical bar | is used for other purposes in Scheme.</i></p>
