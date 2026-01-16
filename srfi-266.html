@@ -55,68 +55,50 @@ arithmetic formulae and what is written in Scheme.</p>
 
 <p>Here is an example of Scheme for computing the root of a quadratic.</p>
 
-<code>
-<pre>
-	(let ((rdelta (sqrt (- (* b b) (* 4 a c)))))
+<pre><code>	(let ((rdelta (sqrt (- (* b b) (* 4 a c)))))
            (values (/ (- rdelta b) 2 a)
                    (/ (+ rdelta b) -2 a)))
-</pre>
-</code>
+</code></pre>
 
 <p>Even experienced Scheme programmers may have trouble validating
 such a simple expression.  What about complex expressions written
 by someone else? As an example, here is a challenging quiz.  Can you
 guess what <code>k</code> represents?  (The answer appears later in the text.)</p>
 
-<code>
-<pre>
-   (define k (- (quotient (+ (abs (- (* dark 20) (* total 10))) total -1) total) 1))
-</pre>
-</code>
+<pre><code>   (define k (- (quotient (+ (abs (- (* dark 20) (* total 10))) total -1) total) 1))
+</code></pre>
 
 <p>This SRFI describes the syntax <code class="expr-keyword">expr</code> that fills the gap between
 Scheme and mathematics, at least for arithmetic. Using this syntax, the above
 examples can be written as below:</p>
 
-<code>
-<pre>
-   (let ((rdelta (sqrt (expr b * b - 4 * a * c))))
+<pre><code>   (let ((rdelta (sqrt (expr b * b - 4 * a * c))))
            (values (expr (- b + rdelta) / (2 * a))
                    (expr (- b - rdelta) / (2 * a))))
-</pre>
-</code>
+</code></pre>
 
 <p>The syntax <code class="expr-keyword">expr</code> is inspired by the eponymous UNIX tool <i>expr</i>.
 The expression at its right is expressed using almost standard formulae.
 Using it, the definition of <code>k</code> becomes:</p>
 
-<code>
-<pre>
-   ; Compute the smallest integer k >= 0 such that (45-5k)% <= dark/total <= (55+5k)%
+<pre><code>   ; Compute the smallest integer k &gt;= 0 such that (45-5k)% &lt;= dark/total &lt;= (55+5k)%
    (define k (expr ((((abs dark)) * 20 - total * 10) + total - 1) : total - 1))
-</pre>
-</code>
+</code></pre>
 
 <p>Writing arithmetic expressions is common when programming. Writing
 logic expressions and comparison expressions is also
 quite common. For this reason, the syntax <code class="expr-keyword">expr</code> comes with
 flavours allowing these expressions, too. Thus it is possible to write:</p>
 
-<code>
-<pre>
-   (if (expr a < 0 and (k or b + c <> 9)))
+<pre><code>   (if (expr a &lt; 0 and (k or b + c &lt;&gt; 9)))
       ...
-</pre>
-</code>
+</code></pre>
 
 instead of:
 
-<code>
-<pre>
-   (if (and (< a 0) (or k (not (= (+ b c) 9))))
+<pre><code>   (if (and (&lt; a 0) (or k (not (= (+ b c) 9))))
       ...
-</pre>
-</code>
+</code></pre>
 
 <p id="bitwise-fixnum"><i><b>SUBJECT TO DISCUSSION</b> Neither bitwise operations nor fixnum
 operation are present in this first draft because these features are
@@ -143,13 +125,13 @@ differs for the the following reasons:</p>
 According to SRFI 261, this syntactic item can be imported
 using:</p>
 
-<p><pre><code>   (import (srfi srfi-266))</code></pre></p>
+<pre><code>   (import (srfi srfi-266))</code></pre>
 
 <p>The syntactic item <code class="expr-keyword">expr</code> is followed by an infix expression
 whose elements <b><code>E</code></b> are separated by space (except if
 enclosed in braces):</p>
 
-<p><pre><code>   (expr E ...)</code></pre></p>
+<pre><code>   (expr E ...)</code></pre>
 
 The expression <b><code>E ...</code></b> must satisfy the
 grammar below:
@@ -245,11 +227,11 @@ no runtime cost.</p>
 
 <p>For example:</p>
 
-<p><pre><code>   (expr a + b + c < d < x - y - z)</code></pre></p>
+<pre><code>   (expr a + b + c &lt; d &lt; x - y - z)</code></pre>
 
 <p>Must be translated to:</p>
 
-<p><pre><code>   (< (+ a b c) d (- x y z))</code></pre></p>
+<pre><code>   (&lt; (+ a b c) d (- x y z))</code></pre>
 
 
 <h2 id="implementation">Implementation</h2>
