@@ -127,19 +127,19 @@ numbers but vectors, matrices, monoid elements, ... For this reason,
 this SRFI includes definition of operators specifically for these
 purposes.</p>
 
-<p>The SRFI 105, <i>Curly-infix-expressions</i>, already introduced
+<p>SRFI 105, <i>Curly-infix-expressions</i>, already introduced
 the ability to write expressions in a more usual way. The current SRFI
 differs for the the following reasons:</p>
 <ul>
-<li>it is standard Scheme and does not require special parsing feature;</li>
-<li>it is more flexible because it has no enforcement on operator usage;</li>
+<li>it is standard Scheme and does not require a special parsing feature;</li>
+<li>it is more flexible because it has no restrictions on operator usage;</li>
 <li>it is simpler to understand by programmers coming from other languages.</li>
 </ul>
 
 <h2 id="specification">Specification</h2>
 
 <p>This SRFI exports only one syntax item: <code class="expr-keyword">expr</code>.
-Accordingly to SRFI 261, this syntactic item can be imported
+According to SRFI 261, this syntactic item can be imported
 using:</p>
 
 <p><pre><code>   (import (srfi srfi-266))</code></pre></p>
@@ -151,7 +151,7 @@ enclosed in braces):</p>
 <p><pre><code>   (expr E ...)</code></pre></p>
 
 The expression <b><code>E ...</code></b> must satisfy the
-below grammar:
+grammar below:
 
 <pre><code>
 
@@ -227,7 +227,7 @@ below grammar:
 </code></pre>
 
 <p><i><b>SUBJECT TO DISCUSSION</b>The above grammar is subject to change
-accordingly to the discussion. It is not currently explained in any way.
+according to the discussion. It is not currently explained in any way.
 The explanation could be done later if needed and if that kind of formalism
 is of interest. At the moment, it is expected that readers can understand
 such grammar or at least guess how it works.
