@@ -32,13 +32,14 @@ The editor will add this section.</p>
 
 <h2 id="abstract">Abstract</h2>
 
-<p>The syntax <code class="expr-keyword">expr</code> allows to write arithmetic expressions using
-a syntax near to mathematical notations, potentially improving
-readability of Scheme programs.</p>
+<p>The syntax <code class="expr-keyword">expr</code> allows one to
+write arithmetic expressions using a syntax near to mathematical
+notation, potentially improving the readability of Scheme programs.</p>
 
 <h2 id="issues">Issues</h2>
 
-<p>When implemented using macros, error reports may be difficult to express.</p>
+<p>When <code class="expr-keyword">expr</code> is implemented using
+macros, error reports may be difficult to express.</p>
 
 <h2 id="rationale">Rationale</h2>
 
@@ -56,10 +57,10 @@ arithmetic formulae and what is written in Scheme.</p>
 </pre>
 </code>
 
-<p>Even experimented Scheme programmers may have trouble to validate
-even a such simple expression. What to say for complex expressions written
-by someone else. As an example, here is a challenging quiz, can you guess
-what <code>k</code> is representing (answer later in the text) ?</p>
+<p>Even experienced Scheme programmers may have trouble validating
+such a simple expression.  What about complex expressions written
+by someone else? As an example, here is a challenging quiz.  Can you
+guess what <code>k</code> represents?  (The answer appears later in the text.)</p>
 
 <code>
 <pre>
@@ -92,8 +93,8 @@ Using it, the definition of <code>k</code> becomes:</p>
 
 <p>Writing arithmetic expressions is common when programming. Writing
 logic expressions and comparison expressions is also
-quiet common. For this reason, the syntax <code class="expr-keyword">expr</code> comes with
-flavours allowing also these expressions. Thus it is possible to write:</p>
+quite common. For this reason, the syntax <code class="expr-keyword">expr</code> comes with
+flavours allowing these expressions, too. Thus it is possible to write:</p>
 
 <code>
 <pre>
@@ -112,14 +113,14 @@ instead of:
 </code>
 
 <p><i><b>SUBJECT TO DISCUSSION</b> Neither bitwise operations nor fixnum
-operation are presented in this first draft because these features are
-not part of R7RS-small. Also it has to be noted that C-like operators
-can not be used because the vertical bar | is trapped in Scheme.</i></p>
+operation are present in this first draft because these features are
+not part of R7RS-small. Also, it has to be noted that C-like operators
+cannot be used because the vertical bar | is used for other purposes in Scheme.</i></p>
 
-<p>Moreover, mathematical formulae can deal with objects that are
-not numbers but vectors, matrices, monoid elements, ... For this
-reason, this SRFI includes definition of operators for on purpose
-computing.</p>
+<p>Moreover, mathematical formulae can deal with objects that are not
+numbers but vectors, matrices, monoid elements, ... For this reason,
+this SRFI includes definition of operators specifically for these
+purposes.</p>
 
 <p>The SRFI-105, <i>Curly-infix-expressions</i>, already introduced
 the ability to write expressions in a more usual way. The current SRFI
