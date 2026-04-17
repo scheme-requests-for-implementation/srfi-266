@@ -121,3 +121,10 @@
    ))
 
 (test-end "test expr syntax")
+
+(test-begin "test lambda-expr syntax")
+(test-equal 'lambda-expr '(2 5 10) (map (lambda-expr (x) x * x + 1) '(1 2 3)))
+(define-expr (next x) x + 1)
+(test-equal 'define-expr '(2 5 10) (map next '(1 4 9)))
+(test-begin "test lambda-expr syntax")
+

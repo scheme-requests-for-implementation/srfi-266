@@ -425,7 +425,7 @@
 
 ; meta syntax definition for defining a syntax doing expr processing
 ; accordingly to operator definitions
-(define-syntax define-expr
+(define-syntax define-expr-syntax
   (syntax-rules etc ()
     ((_ name opdefs)
       (define-syntax name
@@ -434,5 +434,19 @@
             ((_ term ...)
               (t-expr (syntax (term ...)) opdefs))))))))
 
-; definition of expr using define-expr and standard operators' definition
-(define-expr expr stdops)
+; definition of expr using define-expr-syntax and standard operators' definition
+(define-expr-syntax expr stdops)
+
+; syntax for defining lambda simply evaluating expr
+(define-syntax lambda-expr
+  (syntax-rules ()
+    ((_ args terms ...)
+      (lambda args (expr terms ...)))))
+
+; syntax for defining procedure simply evaluating expr
+(define-syntax define-expr
+  (syntax-rules ()
+    ((_ (name . args) terms ...)
+      (define (name . args) (expr terms ...)))))
+
+
