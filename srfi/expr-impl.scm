@@ -423,6 +423,7 @@
         (syntax-violation #f "remaining part" rest))
       result)))
 
+
 ; meta syntax definition for defining a syntax doing expr processing
 ; accordingly to operator definitions
 (define-syntax define-expr-syntax
@@ -437,6 +438,7 @@
 ; definition of expr using define-expr-syntax and standard operators' definition
 (define-expr-syntax expr stdops)
 
+
 ; syntax for defining lambda simply evaluating expr
 (define-syntax lambda-expr
   (syntax-rules ()
@@ -448,5 +450,4 @@
   (syntax-rules ()
     ((_ (name . args) terms ...)
       (define (name . args) (expr terms ...)))))
-
 

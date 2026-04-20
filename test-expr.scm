@@ -3,7 +3,7 @@
 ; SPDX-License-Identifier: MIT
 ; SRFI-266 demo by José Bollo, 2026
 
-(include "expr-impl.scm")
+(include "srfi/expr-impl.scm")
 
 
 (use-modules
