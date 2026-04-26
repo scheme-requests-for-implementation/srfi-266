@@ -8,3 +8,8 @@ It can be checked with guile using the command:
 
 $ guile test-expr.scm
 
+To try using expr as a module, use the command:
+
+$ guile -L $PWD
+
+The module is imported as (srfi 266) or (srfi srfi-266)

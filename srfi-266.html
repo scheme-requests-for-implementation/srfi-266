@@ -42,7 +42,9 @@ notation, potentially improving the readability of Scheme programs.</p>
 <h2 id="issues">Issues</h2>
 
 <ul>
-  <li>Implementing using <code>syntax-rules</code> macros is not easy, and error reports may be difficult to express.</li>
+  <li>Implementing using <code>syntax-rules</code> macros is not easy</li>
+  <li>Error reports may be difficult to express</li>
+  <li>Some discussion remains in progress (<a href="#to-be-discussed">see discussion</a>)</li>
 </ul>
 
 <h2 id="rationale">Rationale</h2>
@@ -51,30 +53,33 @@ notation, potentially improving the readability of Scheme programs.</p>
 their code the gap between what they learnt at school for expressing
 arithmetic formulae and what is written in Scheme.</p>
 
-<p>Here is an example of Scheme for computing the root of a quadratic.</p>
+<p>Here is an example of Scheme for computing the root of a quadratic
+and the Newton transform.</p>
 
-<pre><code>   (let-values (((q r) (floor/ count size)))
-      (if (zero? r) q (+ q 1)))
-
-   (let ((rdelta (sqrt (- (square b) (* 4 a c)))))
+<pre><code>   (let ((rdelta (sqrt (- (square b) (* 4 a c)))))
       (values (/ (+ (- b) rdelta) (* 2 a))
               (/ (- (- b) rdelta) (* 2 a))))
 
-   ; computes the smallest integer k &gt;= 0 such that (45-5k)% &lt;= dark/total &lt;= (55+5k)%)
-   (define k (- (quotient (+ (abs (- (* dark 20) (* total 10))) total -1) total) 1))
+   (define (deriv g)
+      (lambda (x) (/ (- (g (+ x dx)) (g x)) dx)))
+
+   (define (newton-transform g)
+      (lambda (x) (- x (/ (g x) ((deriv g) x)))))
 </code></pre>
 
 <p>This SRFI describes the syntax <code class="expr-keyword">expr</code> that fills the gap between
 Scheme and mathematics, at least for arithmetic. Using this syntax, the above
 examples can be written as below:</p>
 
-<pre><code>   (expr floor/ (count size) as q r in q + ? positive? r)
-
-   (expr sqrt(square b - 4 * a * c) as delta in
+<pre><code>   (expr sqrt(square b - 4 * a * c) as delta in
            values ((- b + delta) / (2 * a)
 	           (- b - delta) / (2 * a)))
 
-   (define k (expr (((abs dark) * 20 - total * 10) + total - 1) \ total - 1))
+   (define (deriv g)
+      (lambda (x) (expr (g(x + dx) - g(x)) / dx)))
+
+   (define (newton-transform g)
+      (lambda (x) (expr x - g(x) / deriv(g)(x))))
 </code></pre>
 
 <p>The syntax <code class="expr-keyword">expr</code> is inspired by the eponymous UNIX tool <i>expr</i>.
@@ -303,6 +308,22 @@ even if it looks like being <code>-3</code>).</p>
 <p>Should be translated to:</p>
 
 <pre><code>   (let ((tmp d)) (and (&lt; (+ a b c) tmp) (&lt;= tmp (- x y z))))</code></pre>
+
+<h2 id="to-be-discussed">TO BE DISCUSSED</h2>
+
+<p>The example implementation opens some doors:</p>
+
+<ul>
+  <li>Expansion of <code class="expr-keyword">expr</code> is parametrized
+      by the list <code>opdefs</code> that define operators.
+      The definition of <code class="expr-keyword">expr</code> is in
+      fact parametric. It opens the door to user defined operations.
+      What should be done of that? (see <code>define-expr-syntax</code>)
+      The answer depends on how it can be supported by scheme implementations.</li>
+  <li>Two obvious syntaxic keywords are added as example, <code>lambda-expr</code>
+      and <code>define-expr</code>. It can be ignored by the current srfi
+      specification because they so simple that it doesn't brings much value.</li>
+</ul>
 
 
 <h2 id="implementation">Implementation</h2>
