@@ -359,7 +359,10 @@
                             (t-infix var nope (t-rest rest) context
                               (lambda (comp2 rest)
                                 ; produce the result and continue
-                                (let ((item `(,(datum->syntax term 'let) ((,var ,term)) (,(datum->syntax term 'and) ,comp1 ,comp2))))
+                                (let* ((tid (oper-item oper))
+				       (s-let (datum->syntax tid 'let))
+				       (s-and (datum->syntax tid 'and))
+				       (item `(,s-let ((,var ,term)) (,s-and ,comp1 ,comp2))))
                                   (t-cont item rest context cont))))))))))))
 
       ; ternary as 3 parts, the third one is separated by the matching ternary2
@@ -427,13 +430,13 @@
 ; meta syntax definition for defining a syntax doing expr processing
 ; accordingly to operator definitions
 (define-syntax define-expr-syntax
-  (syntax-rules etc ()
+  (syntax-rules ()
     ((_ name opdefs)
       (define-syntax name
         (lambda (x)
           (syntax-case x ()
-            ((_ term ...)
-              (t-expr (syntax (term ...)) opdefs))))))))
+            ((_ term (... ...))
+              (t-expr (syntax (term (... ...))) opdefs))))))))
 
 ; definition of expr using define-expr-syntax and standard operators' definition
 (define-expr-syntax expr stdops)
