@@ -35,10 +35,6 @@
 (define (op-as tid args)
   `(,(datum->syntax tid 'let-values) ((,(cadr args) ,(car args))) ,(caddr args)))
 
-; procedure for "a >> b"
-(define (op->> tid args)
-  `(,(datum->syntax tid 'arithmetic-shift) ,(car args) (,(datum->syntax tid '-) ,(cadr args))))
-
 ; standard operators
 (define stdops `(
     (@         left      10  vector-ref)
@@ -72,8 +68,8 @@
     (in        ternary2 160  as)
 
     (~         prefix    30  bitwise-not)
-    (<<        left      60  arithmetic-shift)
-    (>>        left      60  ,op->>)
+    (<<        left      60  bitwise-arithmetic-shift-left)
+    (>>        left      60  bitwise-arithmetic-shift-right)
     (&         list     100  bitwise-and)
     (^         list     110  bitwise-xor)
     (:         list     120  bitwise-ior)
