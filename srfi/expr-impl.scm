@@ -3,192 +3,108 @@
 ; SPDX-License-Identifier: MIT
 ; SRFI-266 demo by José Bollo, 2026
 
+;-------------------------------------------------------
+; procedural part
+;-------------------------------------------------------
+
 ; trick to get distinct variables, to be changed
 (define (nvar)
   (let ((x (generate-temporaries '(x))))
     (car x)))
 
 ; default priority of calls
-(define call-priority 45)
+(define call-priority 10)
 
 ; the less priority
 (define least-priority 1000)
 
-; generate a procedure that return (not (symbol args ...))
-(define (gen-not symbol)
-  (lambda (tid args)
-    `(,(datum->syntax tid 'not) (,(datum->syntax tid symbol) . ,args))))
+; an operator definition, opdef, is a list of 4 elements:
+; - symbol: symbol of the operator
+; - type: one of the symbol left, right, list, comp, ternary, as, pair-of
+; - priority: the priority of the operator
+; - repl: either the replacement symbol or a procedure
+;         returning the replacement
+(define opdef-symbol   car)
+(define opdef-type     cadr)
+(define opdef-priority caddr)
+(define opdef-repl     cadddr)
 
-; procedure for "? a"
-(define (op-bool2int tid args)
-  `(,(datum->syntax tid 'if) ,(car args) 1 0))
-
-; procedure for "a implies b"
-(define (op-implies tid args)
-  `(,(datum->syntax tid 'or) (,(datum->syntax tid 'not) ,(car args)) ,(cadr args)))
-
-; procedure for "a if b else c"
-(define (op-if tid args)
-  `(,(datum->syntax tid 'if) ,(cadr args) ,(car args) ,(caddr args)))
-
-; procedure for "a as b in c"
-(define (op-as tid args)
-  `(,(datum->syntax tid 'let-values) ((,(cadr args) ,(car args))) ,(caddr args)))
-
-; standard operators
-(define stdops `(
-    (@         left      10  vector-ref)
-    (@.        left      10  list-ref)
-    (@@        left      10  bytevector-u8-ref)
-    (@         prefix    10  unbox)
-    (**        left      20  expt)
-    (-         prefix    30  -)
-    (+         prefix    30  +)
-    (not       prefix    30  not)
-    (?         prefix    30  ,op-bool2int)
-    (*         list      40  *)
-    (/         list      40  /)
-    (\         left      40  quotient)
-    (%         left      40  remainder)
-    (+         list      50  +)
-    (-         list      50  -)
-    (<         comp      80  <)
-    (>         comp      80  >)
-    (<=        comp      80  <=)
-    (>=        comp      80  >=)
-    (=         comp      80  =)
-    (!=        left      90  ,(gen-not '=))
-    (and       list     130  and)
-    (or        list     140  or)
-    (implies   left     150  ,op-implies)
-
-    (if        ternary  160  ,op-if)
-    (else      ternary2 160  if)
-    (as        as       160  ,op-as)
-    (in        ternary2 160  as)
-
-    (~         prefix    30  bitwise-not)
-    (<<        left      60  bitwise-arithmetic-shift-left)
-    (>>        left      60  bitwise-arithmetic-shift-right)
-    (&         list     100  bitwise-and)
-    (^         list     110  bitwise-xor)
-    (:         list     120  bitwise-ior)
-    (~&        left     100  bitwise-nand)
-    (~^        left     110  bitwise-eqv)
-    (~:        left     120  bitwise-nor)
-
-    (fx-       prefix    30  fxneg)
-    (fx~       prefix    30  fxnot)
-    (fx*       left      40  fx*)
-    (fx\       left      40  fxquotient)
-    (fx%       left      40  fxremainder)
-    (fx+       left      50  fx+)
-    (fx-       left      50  fx-)
-    (fx<<      left      60  fxarithmetic-shift-left)
-    (fx>>      left      60  fxarithmetic-shift-right)
-    (fx<       comp      80  fx<?)
-    (fx>       comp      80  fx>?)
-    (fx<=      comp      80  fx<=?)
-    (fx>=      comp      80  fx>=?)
-    (fx=       comp      80  fx=?)
-    (fx!=      left      90  ,(gen-not 'fx=?))
-    (fx&       list     100  fxand)
-    (fx^       list     110  fxxor)
-    (fx:       list     120  fxior)
-
-    (fx-       prefix    30  fl-)
-    (fl*       left      40  fl*)
-    (fl/       left      40  fl/)
-    (fl\       left      40  flquotient)
-    (fl%       left      40  flremainder)
-    (fl+       left      50  fl+)
-    (fl-       left      50  fl-)
-    (fl<       comp      80  fl<?)
-    (fl>       comp      80  fl>?)
-    (fl<=      comp      80  fl<=?)
-    (fl>=      comp      80  fl>=?)
-    (fl=       comp      80  fl=?)
-    (fl!=      left      90  ,(gen-not 'fl=?))
-  ))
-
-; extract items of operator description
-(define op-symbol   car)
-(define op-type     cadr)
-(define op-priority caddr)
-(define op-repl     cadddr)
-
-; The context handles the informations
-;  - priority
-;  - function call allowed as funok
-;  - operation list as opdefs
-; It is an improper list
-(define (make-context priority funok opdefs)
-  (cons priority (cons funok opdefs)))
-
-(define context-priority car)
-(define context-funok    cadr)
-(define context-opdefs   cddr)
-
-; return the context with the given priority
-(define (context-of-priority context priority)
-  (cons priority (cdr context)))
-
-; oper record the original item
-; of an operator with the operator using a pair
-(define make-oper cons)
+; oper is a list of 2 elements:
+; - item: the syntax object of the matched operator
+; - def: the definition of the operator
 (define oper-item car)
-(define oper-op   cdr)
+(define oper-def  cdr)
+(define make-oper cons)
 
 ; check if the 2 operator are the same
 (define (oper-eq? oper1 oper2)
   (and oper1
        oper2
-       (eq? (oper-op oper1) (oper-op oper2))))
-
-; get the context coming from applying oper
-(define (oper-context oper context)
-  (context-of-priority context (op-priority (oper-op oper))))
-
-; check if the oper applies in the context
-(define (oper-applies? oper context)
-  (> (context-priority context) (op-priority (oper-op oper))))
+       (eq? (oper-def oper1) (oper-def oper2))))
 
 ; get the type of oper
 (define (oper-type oper)
-  (op-type (oper-op oper)))
+  (opdef-type (oper-def oper)))
+
+; context is a list of 3 elements:
+;  - item: the item that defines the context (opdef or priority)
+;  - funok: function call allowed?
+;  - opdefs: definition of operations
+(define context-item   car)
+(define context-funok  cadr)
+(define context-opdefs caddr)
+
+(define (make-context priority funok opdefs)
+  (list priority funok opdefs))
+
+; return the context with the given priority
+(define (context-of-priority context priority)
+  (cons priority (cdr context)))
+
+; get the context coming from applying oper
+(define (context-of-oper context oper)
+  (cons (oper-def oper) (cdr context)))
+
+; check if the oper applies in the context
+(define (oper-applies? oper context)
+  (let* ((opdef (oper-def oper))
+         (item  (context-item context))
+         (prio  (if (number? item) item (opdef-priority item))))
+    (or (> prio (opdef-priority opdef))
+        (and (eq? item opdef) (eqv? (opdef-type item) 'right)))))
 
 ; test if oper2 is the second operator of a ternary operation
 ; started by oper1
-(define (oper-ternary-fits? oper1 oper2)
-  (let ((op1 (oper-op oper1))
-        (op2 (oper-op oper2)))
-    (and (eqv? (op-type op2) 'ternary2)
-         (eqv? (op-repl op2) (op-symbol op1)))))
+(define (pair-of? oper1 oper2)
+  (let ((op1 (oper-def oper1))
+        (op2 (oper-def oper2)))
+    (and (eqv? (opdef-type op2) 'pair-of)
+         (eqv? (opdef-repl op2) (opdef-symbol op1)))))
 
 ; transform the operator 'oper' on its arguments
 (define (oper-apply oper args)
   (let ((tid  (oper-item oper))
-	(repl (op-repl (oper-op oper))))
+        (repl (opdef-repl (oper-def oper))))
     (cond
       ((symbol? repl)
         (cons (datum->syntax tid repl) args))
       ((procedure? repl)
         (repl tid args))
       (else
-        (error "bad operator definition" (oper-op oper))))))
+        (error "bad operator definition" (oper-def oper))))))
 
 ; get the prefix operation of given item
 ; or #f if item doesn't stand for a prefix
 (define (s-oper item context prefix?)
   (and (identifier? item)
        (let ((sym (syntax->datum item)))
-	 (let lp ((iter-opdefs (context-opdefs context)))
-	   (and (pair? iter-opdefs)
-		(let ((opdef (car iter-opdefs)))
-		  (if (and (eqv? sym (op-symbol opdef))
-                           (eqv? prefix? (eqv? 'prefix (op-type opdef))))
+         (let lp ((iter-opdefs (context-opdefs context)))
+           (and (pair? iter-opdefs)
+                (let ((opdef (car iter-opdefs)))
+                  (if (and (eqv? sym (opdef-symbol opdef))
+                           (eqv? prefix? (eqv? 'prefix (opdef-type opdef))))
                     (make-oper item opdef)
-		    (lp (cdr iter-opdefs)))))))))
+                    (lp (cdr iter-opdefs)))))))))
 
 ; get the prefix operation of given item
 ; or #f if item doesn't stand for a prefix
@@ -235,7 +151,7 @@
          (oper (s-prefix head context)))
     (if oper
       ; head is a prefix operator, get the term where it apply
-      (t-prefix rest (oper-context oper context)
+      (t-prefix rest (context-of-oper context oper)
         (lambda (term rest)
           (t-cont (oper-apply oper (list term)) rest context cont)))
       ; head isn't a prefix operator so it is a term
@@ -262,17 +178,17 @@
             (t-call term rest context cont)
             (cont term rest)))))))
 
-; transform a function call
-; func is the expression representing the procedure to be called
-(define (t-call func rest context cont)
+; transform a call
+; call is the expression representing the procedure to be called
+(define (t-call call rest context cont)
   (let ((head (t-first rest)))
     ; check if head is a list
     (syntax-case head ()
       ((args ...)
-        ; it is a pair, space are argument's separation not function calls
+        ; it is a list, space are argument's separation not function calls
         (let ((arg-ctxt (make-context least-priority #f (context-opdefs context))))
           ; loop on args
-          (let t-arg ((rlst (list func))
+          (let t-arg ((rlst (list call))
                       (frst (syntax (args ...))))
             (t-prefix frst arg-ctxt
               (lambda (term frst)
@@ -285,7 +201,7 @@
         ; only one argument follows
         (t-prefix rest (context-of-priority context call-priority)
           (lambda (term rest)
-            (t-cont (list func term) rest context cont)))))))
+            (t-cont (list call term) rest context cont)))))))
 
 ; transform an infix operator 'oper' preceded by 'term' and followed
 ; by 'rest'
@@ -294,12 +210,20 @@
   (unless rest
     (syntax-violation #f "unexpected end after operator" (oper-item oper)))
   ; prepare the ccontext of the operation
-  (let ((op-ctxt (oper-context oper context)))
+  (let ((op-ctxt (context-of-oper context oper)))
     ; processing depends of the type of the operator
     (case (oper-type oper)
 
       ; for left associative operators
       ((left)
+        (t-prefix rest op-ctxt
+                (lambda (second rest)
+                  (let* ((args (list term second))
+                         (item (oper-apply oper args)))
+                    (t-cont item rest context cont)))))
+
+      ; for right associative operators
+      ((right)
         (t-prefix rest op-ctxt
                 (lambda (second rest)
                   (let* ((args (list term second))
@@ -326,7 +250,7 @@
                           (t-cont item rest context cont))))))))
 
       ; for comparison operators, it translates a < b <= c in (let ((x b)) (and (< a x) (<= x c)))
-      ((comp)
+      ((compare)
         ; get the list of terms that have the same operator
         (let lp ((rlst (list term))
                  (rest rest))
@@ -339,13 +263,13 @@
                       (if (oper-eq? nope oper)
                         ; it is the same, add the term to list and loop
                         (lp (cons term rlst) (t-rest rest))
-                        ; it is not the same, check if it is of type comp
-                        (if (not (and nope (eqv? 'comp (oper-type nope))))
-                          ; not of type comp, continue
+                        ; it is not the same, check if it is of type compare
+                        (if (not (and nope (eqv? 'compare (oper-type nope))))
+                          ; not of type compare, continue
                           (let* ((args (reverse (cons term rlst)))
                                  (item (oper-apply oper args)))
                             (t-cont item rest context cont))
-                          ; it is of type comp
+                          ; it is of type compare
                           ; create a variable for holding current 'term' value
                           ; create the comparison of current operator with this variable
                           (let* ((var   (nvar))
@@ -356,25 +280,25 @@
                               (lambda (comp2 rest)
                                 ; produce the result and continue
                                 (let* ((tid (oper-item oper))
-				       (s-let (datum->syntax tid 'let))
-				       (s-and (datum->syntax tid 'and))
-				       (item `(,s-let ((,var ,term)) (,s-and ,comp1 ,comp2))))
+                                       (s-let (datum->syntax tid 'let))
+                                       (s-and (datum->syntax tid 'and))
+                                       (item `(,s-let ((,var ,term)) (,s-and ,comp1 ,comp2))))
                                   (t-cont item rest context cont))))))))))))
 
-      ; ternary as 3 parts, the third one is separated by the matching ternary2
+      ; ternary as 3 parts, the third one is separated by the matching pair-of
       ((ternary)
         (letrec ((t-middle
                   (lambda (term2 rest)
-                    ; scan head of rest for the second ternary operator
+                    ; scan head of rest until the paired operator
                     (let* ((head  (t-first rest))
                            (nope  (s-infix head context)))
-                      ; test if head is the second symbol of ternary
+                      ; test if head is the paired symbol
                       (if (not nope)
                         (syntax-violation #f "ternary not closed" (oper-item oper))
-                        (if (not (oper-ternary-fits? oper nope))
-			  ; no, so maybe a nested ternary
+                        (if (not (pair-of? oper nope))
+                          ; no, so maybe a nested ternary
                           (t-infix term2 nope (t-rest rest) op-ctxt t-middle)
-			  ; yes, get third expression and conclude
+                          ; yes, get third expression and conclude
                           (t-prefix (t-rest rest) op-ctxt
                                 (lambda (term3 rest)
                                   (let* ((args (list term term2 term3))
@@ -385,30 +309,27 @@
 
       ; as is special, the second part is a list of symbols
       ((as)
-        ; get second expression, a list of items until ternary fit
+        ; get second expression, a list of items until paired symbol
         (let t-id ((term2 '())
                    (rest  rest))
-	  ; scan head
+          ; scan head
           (let ((head  (t-first rest))
                 (rest  (t-rest rest)))
-	    ; test if head is the second symbol of the ternary
+            ; test if head is the paired symbol
             (if (not head)
               (syntax-violation #f "as not closed" (oper-item oper))
               (let ((nope  (s-infix head context)))
-                (if (and nope (oper-ternary-fits? oper nope))
-		  ; yes, get third expression and conclude
+                (if (and nope (pair-of? oper nope))
+                  ; yes, get third expression and conclude
                   (t-prefix rest op-ctxt
                         (lambda (term3 rest)
                           (let* ((args (list term (reverse term2) term3))
                                  (item (oper-apply oper args)))
                             (t-cont item rest context cont))))
-		  ; no, capture head in term2 and iterate
+                  ; no, capture head in term2 and iterate
                   (t-id (cons head term2) rest)))))))
 
-      ((right)
-        (error "not yet implemented" (oper-item oper)))
-
-      ((ternary2)
+      ((pair-of)
         (syntax-violation #f "second of ternary without first" (oper-item oper)))
 
       (else
@@ -422,6 +343,133 @@
         (syntax-violation #f "remaining part" rest))
       result)))
 
+;-------------------------------------------------------
+; syntax helpers
+;-------------------------------------------------------
+
+; ensure that data is a syntaxic expression
+(define (resyntax tid vars item)
+  (syntax-case item ()
+    ((x ...)
+      (let ((lst (syntax (x ...))))
+        (cons (datum->syntax item 'list)
+          (map
+            (lambda (item)
+              (resyntax tid vars item))
+            lst))))
+    ((x . z)
+      (list (datum->syntax item 'cons)
+            (resyntax tid vars (syntax x))
+            (resyntax tid vars (syntax z))))
+    ((x y ... . z)
+      (list (datum->syntax item 'cons)
+            (resyntax tid vars (syntax x))
+            (resyntax tid vars (syntax (y ... . z)))))
+    (_
+      (let ((value (syntax->datum item)))
+        (if (member value vars)
+          item
+          (list (datum->syntax item 'datum->syntax)
+                tid
+                (datum->syntax item (list 'quote value))))))))
+
+(define-syntax resyntax-expr
+  (lambda (x)
+    (syntax-case x ()
+      ((_ tid vars item)
+        (resyntax #'tid (syntax->datum #'vars) #'item)))))
+
+;-------------------------------------------------------
+; abstract syntaxic part
+;-------------------------------------------------------
+
+(define-syntax opdefs-add
+  (syntax-rules ()
+    ((_ opdefs oper type priority repl)
+      (set! opdefs (cons (list 'oper 'type priority repl) opdefs)))))
+
+(define-syntax opdefs-add-prefix
+  (syntax-rules ()
+    ((_ opdefs oper priority procname)
+      (opdefs-add opdefs oper prefix priority
+        (lambda (tid args)
+          (list (datum->syntax tid 'procname) (car args)))))
+    ((_ opdefs oper priority (x) r)
+      (opdefs-add opdefs oper prefix priority
+        (lambda (tid args)
+          (let ((x (car args)))
+            (resyntax-expr tid (x) r)))))
+  ))
+
+(define-syntax opdefs-add-left-infix
+  (syntax-rules ()
+    ((_ opdefs oper priority procname)
+      (opdefs-add opdefs oper left priority
+        (lambda (tid args)
+          (list (datum->syntax tid 'procname) (car args) (cadr args)))))
+    ((_ opdefs oper priority (x y) r)
+      (opdefs-add opdefs oper left priority
+        (lambda (tid args)
+          (let ((x (car args))
+                (y (cadr args)))
+            (resyntax-expr tid (x y) r)))))
+  ))
+
+(define-syntax opdefs-add-right-infix
+  (syntax-rules ()
+    ((_ opdefs oper priority procname)
+      (opdefs-add opdefs oper right priority
+        (lambda (tid args)
+          (list (datum->syntax tid 'procname) (car args) (cadr args)))))
+    ((_ opdefs oper priority (x y) r)
+      (opdefs-add opdefs oper right priority
+        (lambda (tid args)
+          (let ((x (car args))
+                (y (cadr args)))
+            (resyntax-expr tid (x y) r)))))
+  ))
+
+(define-syntax opdefs-add-list
+  (syntax-rules ()
+    ((_ opdefs oper priority procname)
+      (opdefs-add opdefs oper list priority
+        (lambda (tid args)
+          (cons (datum->syntax tid 'procname) args))))
+    ((_ opdefs oper priority x r)
+      (opdefs-add opdefs oper list priority
+        (lambda (tid x)
+          (resyntax-expr tid (x) r))))
+  ))
+
+(define-syntax opdefs-add-compare
+  (syntax-rules ()
+    ((_ opdefs oper priority procname)
+      (opdefs-add opdefs oper compare priority
+        (lambda (tid args)
+          (cons (datum->syntax tid 'procname) args))))
+    ((_ opdefs oper priority x r)
+      (opdefs-add opdefs oper compare priority
+        (lambda (tid x)
+          (resyntax-expr tid (x) r))))
+  ))
+
+(define-syntax opdefs-add-ternary
+  (syntax-rules ()
+    ((_ opdefs first second priority procname)
+      (set! opdefs (cons (list 'first 'ternary priority 'procname)
+                         (cons (list 'second 'pair-of priority 'first)
+                               opdefs))))
+    ((_ opdefs first second priority (x y z) r)
+      (set! opdefs (cons (list 'first 'ternary priority
+                             (lambda (tid args)
+                               (let ((x (car args))
+                                     (y (cadr args))
+                                     (z (caddr args)))
+                                  (resyntax-expr tid (x y z) r))))
+                          (cons (list 'second 'pair-of priority 'first)
+                                opdefs))))
+  ))
+
 
 ; meta syntax definition for defining a syntax doing expr processing
 ; accordingly to operator definitions
@@ -434,19 +482,161 @@
             ((_ term (... ...))
               (t-expr (syntax (term (... ...))) opdefs))))))))
 
+;-------------------------------------------------------
+; Standard implementation
+;-------------------------------------------------------
+
+; generate a procedure that return (not (symbol args ...))
+(define (gen-not symbol)
+  (lambda (tid args)
+    `(,(datum->syntax tid 'not) (,(datum->syntax tid symbol) . ,args))))
+
+; procedure for "? a"
+(define (op-bool2int tid args)
+  `(,(datum->syntax tid 'if) ,(car args) 1 0))
+
+; procedure for "a implies b"
+(define (op-implies tid args)
+  `(,(datum->syntax tid 'or) (,(datum->syntax tid 'not) ,(car args)) ,(cadr args)))
+
+; procedure for "a if b else c"
+(define (op-if tid args)
+  `(,(datum->syntax tid 'if) ,(cadr args) ,(car args) ,(caddr args)))
+
+; procedure for "a as b in c"
+(define (op-as tid args)
+  `(,(datum->syntax tid 'let-values) ((,(cadr args) ,(car args))) ,(caddr args)))
+
+; standard operators
+(define stdops `(
+    (@         left      10  vector-ref)
+    (@.        left      10  list-ref)
+    (@@        left      10  bytevector-u8-ref)
+    (@         prefix    10  unbox)
+    (**        left      20  expt)
+    (-         prefix    30  -)
+    (+         prefix    30  +)
+    (not       prefix    30  not)
+    (?         prefix    30  ,op-bool2int)
+    (*         list      40  *)
+    (/         list      40  /)
+    (\         left      40  quotient)
+    (%         left      40  remainder)
+    (+         list      50  +)
+    (-         list      50  -)
+    (<         compare   80  <)
+    (>         compare   80  >)
+    (<=        compare   80  <=)
+    (>=        compare   80  >=)
+    (=         compare   80  =)
+    (!=        left      90  ,(gen-not '=))
+    (and       list     130  and)
+    (or        list     140  or)
+    (implies   left     150  ,op-implies)
+
+    (if        ternary  160  ,op-if)
+    (else      pair-of  160  if)
+    (as        as       160  ,op-as)
+    (in        pair-of  160  as)
+
+    (~         prefix    30  bitwise-not)
+    (<<        left      60  bitwise-arithmetic-shift-left)
+    (>>        left      60  bitwise-arithmetic-shift-right)
+    (&         list     100  bitwise-and)
+    (^         list     110  bitwise-xor)
+    (:         list     120  bitwise-ior)
+    (~&        left     100  bitwise-nand)
+    (~^        left     110  bitwise-eqv)
+    (~:        left     120  bitwise-nor)
+
+    (fx-       prefix    30  fxneg)
+    (fx~       prefix    30  fxnot)
+    (fx*       left      40  fx*)
+    (fx\       left      40  fxquotient)
+    (fx%       left      40  fxremainder)
+    (fx+       left      50  fx+)
+    (fx-       left      50  fx-)
+    (fx<<      left      60  fxarithmetic-shift-left)
+    (fx>>      left      60  fxarithmetic-shift-right)
+    (fx<       compare   80  fx<?)
+    (fx>       compare   80  fx>?)
+    (fx<=      compare   80  fx<=?)
+    (fx>=      compare   80  fx>=?)
+    (fx=       compare   80  fx=?)
+    (fx!=      left      90  ,(gen-not 'fx=?))
+    (fx&       list     100  fxand)
+    (fx^       list     110  fxxor)
+    (fx:       list     120  fxior)
+
+    (fl-       prefix    30  fl-)
+    (fl*       left      40  fl*)
+    (fl/       left      40  fl/)
+    (fl\       left      40  flquotient)
+    (fl%       left      40  flremainder)
+    (fl+       left      50  fl+)
+    (fl-       left      50  fl-)
+    (fl<       compare   80  fl<?)
+    (fl>       compare   80  fl>?)
+    (fl<=      compare   80  fl<=?)
+    (fl>=      compare   80  fl>=?)
+    (fl=       compare   80  fl=?)
+    (fl!=      left      90  ,(gen-not 'fl=?))
+  ))
+
 ; definition of expr using define-expr-syntax and standard operators' definition
 (define-expr-syntax expr stdops)
 
-
-; syntax for defining lambda simply evaluating expr
-(define-syntax lambda-expr
+; set the prefix operation oper
+(define-syntax expr-set-prefix
   (syntax-rules ()
-    ((_ args terms ...)
-      (lambda args (expr terms ...)))))
+    ((_ oper priority procname)
+      (opdefs-add-prefix stdops oper priority procname))
+    ((_ oper priority (x) r)
+      (opdefs-add-prefix stdops oper priority (x) r))
+  ))
 
-; syntax for defining procedure simply evaluating expr
-(define-syntax define-expr
+; set the left infix operation oper
+(define-syntax expr-set-left-infix
   (syntax-rules ()
-    ((_ (name . args) terms ...)
-      (define (name . args) (expr terms ...)))))
+    ((_ oper priority procname)
+      (opdefs-add-left-infix stdops oper priority procname))
+    ((_ oper priority (x y) r)
+      (opdefs-add-left-infix stdops oper priority (x y) r))
+  ))
+
+; set the right infix operation oper
+(define-syntax expr-set-right-infix
+  (syntax-rules ()
+    ((_ oper priority procname)
+      (opdefs-add-right-infix stdops oper priority procname))
+    ((_ oper priority (x y) r)
+      (opdefs-add-right-infix stdops oper priority (x y) r))
+  ))
+
+; set the list operation oper
+(define-syntax expr-set-list
+  (syntax-rules ()
+    ((_ oper priority procname)
+      (opdefs-add-list stdops oper priority procname))
+    ((_ oper priority x r)
+      (opdefs-add-list stdops oper priority x r))
+  ))
+
+; set the compare operation oper
+(define-syntax expr-set-compare
+  (syntax-rules ()
+    ((_ oper priority procname)
+      (opdefs-add-compare stdops oper priority procname))
+    ((_ oper priority x r)
+      (opdefs-add-compare stdops oper priority x r))
+  ))
+
+; set the ternary operation oper
+(define-syntax expr-set-ternary
+  (syntax-rules ()
+    ((_ first second priority procname)
+      (opdefs-add-ternary stdops first second priority procname))
+    ((_ first second priority (x y z) r)
+      (opdefs-add-ternary stdops first second priority (x y z) r))
+  ))
 

@@ -7,7 +7,12 @@
   (import (scheme base)
 	  (scheme cxr)
           (rnrs syntax-case (6)))
-  (export expr)
-  (include "expr-impl.scm")
+  (export expr
+          expr-set-prefix
+          expr-set-left-infix
+          expr-set-right-infix
+          expr-set-list
+          expr-set-compare
+          expr-set-ternary)
 )
 
