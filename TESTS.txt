@@ -1,12 +1,22 @@
 SPDX-FileCopyrightText: 2026 José Bollo
 SPDX-License-Identifier: MIT
 
-The program 'test-expr.scm' checks that the produced
-implementation of 'expr' works as expected.
+Programs 'test-expr.scm' and 'test-expr-guile.scm' check
+that the produced implementation of 'expr' works as expected.
 
-It can be checked with guile using the command:
+It does it by checking the expected result for 'test-expr.scm'
+or by checking the expected expansion (guile specific) for
+'test-expr-guile.scm.
+
+Both programs use the data of 'test-sets.scm'.
+
+Tests can be run with guile using the command:
 
 $ guile test-expr.scm
+
+or
+
+$ guile test-expr-guile.scm
 
 To try using expr as a module, use the command:
 
