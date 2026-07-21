@@ -390,7 +390,7 @@ even if it looks like being <code>-3</code>).</p>
     <p>Infix operator for compare operation.</p>
     <p><b><code>X OPERATOR Y [OPERATOR Z]...</code></b> becomes
        <b><code>(OPERATION X Y Z...)</code></b>.</p>
-    <p>Heterogenous comparison.</p>
+    <p>Heterogeneous comparison.</p>
     <p><b><code>X COMP1 [Y COMP1]... Z COMP2 A [COMP2 B]...</code></b> becomes
        <b><code>(let ((tmp Z)) (and (COMP1 X Y... tmp) (COMP2 tmp A B...)))</code></b>.</p>
   </li>
@@ -406,7 +406,7 @@ even if it looks like being <code>-3</code>).</p>
   </li>
 </ul>
 
-<p>Theise type above can be used for defining new operators.
+<p>These type above can be used for defining new operators.
 See <a href="operator-definition">below</a> for details on defining or
 redefining operators for syntax <code class="expr-keyword">expr</code>.</p>
 
@@ -463,9 +463,9 @@ because they have a specialized implementation::</p>
   <dd>
         <p>Except if at the place of an argument of a call,
         when a sub-expression only contains one sub-expression,
-        it expands to the inner sub-express, literaly,
-        literaly by this subexpression. Then <b><code>((a ...))</code></b>
-          becomes <b><code>(a ...)</code></b> without applying implicitely <b>expr</b>
+        it expands to the inner sub-express, literally,
+        literally by this subexpression. Then <b><code>((a ...))</code></b>
+          becomes <b><code>(a ...)</code></b> without applying implicitly <b>expr</b>
   to the enclosed subexpression.</p></dd>
 </dl>
 
@@ -473,7 +473,7 @@ because they have a specialized implementation::</p>
 
 <p>It is possible to define or to redefine operators.
 Definition occurs when the operator is not already defined.
-Redefinition occurs when the operator is already defined, in that
+Redefinition occurs when the operator is already defined.  In that
 case, the new definition replaces the older one.</p>
 
 <p>Definition or redefinition set the priority of the
@@ -600,7 +600,7 @@ These helpers are of two main types: basic or procedural.</p>
      <tr> <td> if else </td> <td>ternary</td> <td>160</td>  <td> if </td> </tr>
      <tr> <td> as in   </td> <td>as</td> <td>160</td>  <td> let-values </td> </tr>
 
-     <tr> <td> ~       </td> <td>prefix</td> <td>30</td>  <td> biwise-not  </td> </tr>
+     <tr> <td> ~       </td> <td>prefix</td> <td>30</td>  <td> bitwise-not  </td> </tr>
      <tr> <td> &lt;&lt;</td> <td>left</td> <td>60</td>   <td> bitwise-arithmetic-shift-left </td> </tr>
      <tr> <td> &gt;&gt;</td> <td>left</td> <td>60</td>   <td> bitwise-arithmetic-shift-right </td> </tr>
      <tr> <td> &amp;   </td> <td>list</td> <td>100</td>  <td> bitwise-and </td> </tr>
