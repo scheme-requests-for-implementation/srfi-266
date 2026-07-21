@@ -3,11 +3,17 @@
 ; SPDX-License-Identifier: MIT
 ; SRFI-266 demo by José Bollo, 2026
 
-(define-library (srfi 266) ;expr
+(define-library (srfi srfi-266) ;expr
   (import (scheme base)
 	  (scheme cxr)
           (rnrs syntax-case (6)))
-  (export expr)
+  (export expr
+          expr-set-prefix
+          expr-set-left-infix
+          expr-set-right-infix
+          expr-set-list
+          expr-set-compare
+          expr-set-ternary)
   (include "expr-impl.scm")
 )
 

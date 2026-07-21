@@ -32,6 +32,7 @@ code.expr-keyword {
       <li>Draft #2 published: 2026-03-08</li>
       <li>Draft #3 published: 2026-03-30</li>
       <li>Draft #4 published: 2026-04-26</li>
+      <li>Draft #5 published: 2026-07-??</li>
     </ul>
 
 <h2 id="abstract">Abstract</h2>
@@ -43,9 +44,7 @@ notation, potentially improving the readability of Scheme programs.</p>
 <h2 id="issues">Issues</h2>
 
 <ul>
-  <li>Implementing using <code>syntax-rules</code> macros is not easy</li>
   <li>Error reports may be difficult to express</li>
-  <li>Some discussion remains in progress (<a href="#to-be-discussed">see discussion</a>)</li>
 </ul>
 
 <h2 id="rationale">Rationale</h2>
@@ -57,9 +56,11 @@ arithmetic formulae and what is written in Scheme.</p>
 <p>Here is an example of Scheme for computing the root of a quadratic
 and the Newton transform.</p>
 
-<pre><code>   (let ((rdelta (sqrt (- (square b) (* 4 a c)))))
-      (values (/ (+ (- b) rdelta) (* 2 a))
-              (/ (- (- b) rdelta) (* 2 a))))
+<p>Here is the common Scheme code:</p>
+
+<pre><code>   (let ((delta (sqrt (- (* b b) (* 4 a c)))))
+      (values (/ (+ (- b) delta) (* 2 a))
+              (/ (- (- b) delta) (* 2 a))))
 
    (define (deriv g)
       (lambda (x) (/ (- (g (+ x dx)) (g x)) dx)))
@@ -68,13 +69,13 @@ and the Newton transform.</p>
       (lambda (x) (- x (/ (g x) ((deriv g) x)))))
 </code></pre>
 
-<p>This SRFI describes the syntax <code class="expr-keyword">expr</code> that fills the gap between
-Scheme and mathematics, at least for arithmetic. Using this syntax, the above
-examples can be written as below:</p>
+<p>This SRFI describes the syntax <code class="expr-keyword">expr</code> that
+fills the gap between Scheme and mathematics, at least for arithmetic.
+Using this syntax, the above examples can be written as below:</p>
 
-<pre><code>   (expr sqrt(square b - 4 * a * c) as delta in
+<pre><code>   (expr sqrt(b * b - 4 * a * c) as delta in
            values ((- b + delta) / (2 * a)
-	           (- b - delta) / (2 * a)))
+                   (- b - delta) / (2 * a)))
 
    (define (deriv g)
       (lambda (x) (expr (g(x + dx) - g(x)) / dx)))
@@ -83,35 +84,40 @@ examples can be written as below:</p>
       (lambda (x) (expr x - g(x) / deriv(g)(x))))
 </code></pre>
 
-<p>The syntax <code class="expr-keyword">expr</code> is inspired by the eponymous UNIX tool <i>expr</i>.
-The expression at its right is expressed using almost standard formulae.</p>
+<p>The syntax <code class="expr-keyword">expr</code> is inspired by the eponymous
+UNIX tool <i>expr</i>. The expression at its right is expressed using almost
+standard formulae.</p>
 
 <p>Writing arithmetic expressions is common when programming.
 Writing logic expressions and comparison expressions is also
-quite common. For this reason, the syntax <code class="expr-keyword">expr</code> comes with
-flavours allowing these expressions, too. Thus it is possible to write:</p>
+quite common. For this reason, the syntax <code class="expr-keyword">expr</code>
+also handles comparisons and logic operators.</p>
 
-<pre><code>   (if (expr a &lt; 0 and (k or b + c &lt;&gt; 9)))
+<p>Thus instead of writing:</p>
+
+<pre><code>   (if (and (&lt; a 1) (not (= (+ b c) 9)))
       ...
 </code></pre>
 
-instead of:
+<p>It is possible to write:</p>
 
-<pre><code>   (if (and (&lt; a 0) (or k (not (= (+ b c) 9))))
+<pre><code>   (if (expr a &lt; 1 and b + c != 9))
       ...
 </code></pre>
 
-<p>SRFI 105, <i>Curly-infix-expressions</i>, already introduced
+<p>A previous SRFI, the <a href="https://srfi.schemers.org/srfi-105/">SRFI 105</a>,
+<i>Curly-infix-expressions</i>, already introduced
 the ability to write expressions in a more usual way. The current SRFI
-differs for the the following reasons:</p>
+differs of SRFI 105 on the following points:</p>
 <ul>
 <li>it is standard Scheme and does not require a special parsing feature;</li>
 <li>it is more flexible because it has no restrictions on operator usage;</li>
-<li>it is simpler to understand by programmers coming from other languages.</li>
+<li>it is simpler to understand by programmers coming from other languages;</li>
+<li>its usage is clearly identified by using <code class="expr-keyword">expr</code>.</li>
 </ul>
 
 <p>However, SRFI-105 is compatible with this SRFI when <i>$nfx$</i>
-and is defined as below:
+and is defined as below:</p>
 
 <pre>
 <code>
@@ -124,8 +130,7 @@ and is defined as below:
 
 <h2 id="specification">Specification</h2>
 
-<p>This SRFI exports only one syntax item: <code class="expr-keyword">expr</code>.
-According to SRFI 261, this syntactic item can be imported
+<p>According to SRFI 261, items exported by this SRFI can be imported
 using:</p>
 
 <pre><code>   (import (srfi srfi-266))</code></pre>
@@ -134,22 +139,431 @@ using:</p>
 
 <pre><code>   (import (srfi expr-266))</code></pre>
 
-<p>The syntactic item <b>expr</b> is followed by an expression
-whose elements <b><code>E</code></b> are separated by space
-(except if enclosed in braces):</p>
+<p>This SRFI exports one main syntax item: <code class="expr-keyword">expr</code>.</p>
+
+<p>It also exports <code class="expr-keyword">expr-set-prefix</code>,
+<code class="expr-keyword">expr-set-left-infix</code>,
+<code class="expr-keyword">expr-set-right-infix</code>,
+<code class="expr-keyword">expr-set-list</code>,
+<code class="expr-keyword">expr-set-compare</code>,
+<code class="expr-keyword">expr-set-ternary</code>
+that serve to define or redefine operators (see <a href="#customize">below</a>).<p>
+
+<h3>The expr syntax</h3>
+
+<p>The syntactic item <code class="expr-keyword">expr</code> should be followed by
+an expression <b><code>E ...</code></b>:</p>
 
 <pre><code>   (expr E ...)</code></pre>
 
-<p>The expression <b><code>E ...</code></b> is made of variables,
-numbers and operators.</p>
+<p>The syntax <code class="expr-keyword">expr</code> transforms the
+expression <b><code>E ...</code></b> to its equivalent scheme expression during
+syntaxic expansion.
+It means that using <code class="expr-keyword">expr</code> has no runtime cost.</p>
 
-<p>Operators are keywords, and can't be redefined.
-They are scanned as symbols, not as bindings to values.
-This rule is required for providing an unambiguous translation
-of a rich set of operators, and to provision it without
-requiring any <i>import</i> of any library.</p>
+<p>For example:</p>
 
-<p>Here is the list of operators defined for <b>expr</b>:</p>
+<pre><code>   (expr a + b + c &lt; d &lt;= x - y - z)</code></pre>
+
+<p>Should be translated something looking like:</p>
+
+<pre><code>   (let ((temporary-1 d))
+      (and (&lt; (+ a b c) temporary-1)
+           (&lt;= temporary-1 (- x y z))))</code></pre>
+
+<p>The expression <b><code>E ...</code></b> follows the grammar of EXPRESSION defined below:</p>
+
+<pre>
+<code>  EXPRESSION := FORMULA
+              | CALL
+     FORMULA := TERM
+              | FORMULA infix-operator TERM
+        TERM := VALUE
+              | prefix-operator TERM
+       VALUE := constant
+              | symbol
+              | '(' EXPRESSION ')'
+
+        CALL := FORMULA '(' ARGUMENTS ')'
+              | FORMULA EXPRESSION
+   ARGUMENTS := FORMULA
+              | ARGUMENTS FORMULA
+</code>
+</pre>
+
+
+<p>The expression <b><code>E ...</code></b> is made of constants, variables,
+operators, calls and sub-expressions.</p>
+
+<ul>
+
+<li>
+        <p>Constants are number, strings, vectors, booleans, ...</p>
+</li>
+
+<li>
+        <p>Variables are symbols related to variables bound in the context
+        of the expression.</p>
+</li>
+
+<li>
+        <p>Operators are keywords.  They are scanned as symbols, not as
+        bindings to values.
+        This rule is required for providing an unambiguous translation
+        of a rich set of operators, and to provision it without
+        requiring any <i>import</i> of any library.</p>
+
+        <p><b>CAUTION: because of this rule, a potential clash may occur
+        when the same symbol is used for an operator and a variable.</b></p>
+
+        <p>The SRFI comes with a predefined set of operators.
+        These operators are listed <a href="#predefined-operators">below</a>.</p>
+
+        <p>Operators are of one of the below types:</p>
+
+        <ul>
+                <li>
+                        <b>prefix</b>: prefixed operator.
+                </li>
+                <li>
+                        <b>left</b>: binary operator left associative.
+                </li>
+                <li>
+                        <b>right</b>: binary operator right associative.
+                </li>
+                <li>
+                        <b>list</b>: infix operator leading to list call
+                        (i.e. like <code>+</code>).
+                </li>
+                <li>
+                        <b>compare</b>: infix operator leading to list predicate
+                        (i.e. like <code>&lt;</code>).
+                </li>
+                <li>
+                        <b>ternary</b>: ternary operator
+                        (i.e. like <code>if</code>/<code>else</code>).
+                </li>
+        </ul>
+
+        <p>Types of operators are described <a href="#operator-types">below</a>.</p>
+
+        <p id="priority">Operators have a priority number. The lower the priority number
+        is, the most prioritized is the operator.</p>
+
+        <p>Example of priority of operators: the predefined operators
+        <code>+</code> and <code>*</code> have respective priority numbers of
+        50 and 40. Thus:</p>
+
+        <ul>
+                <li>
+                        <code>(expr a + b * c)</code>
+                        becomes
+                        <code>(+ a (* b c))</code>
+                </li>
+                <li>
+                        <code>(expr a * b + c)</code>
+                        becomes
+                        <code>(+ (* a b) c)</code>
+                </li>
+</li>
+
+<li>
+        <p>Calls are right associatives.</p>
+
+        <p>Calls are made of two parts: the called and the arguments:</p>
+
+        <ul>
+                <li>the called is a symbol or a sub expression evaluating to
+                callable a lambda, it has the location of a prefix operator
+                but is not a prefix operator.</li>
+
+                <li>the arguments are either a single expression or
+                a sub-expression in parentheses.
+                When it is a sub-expression in parentheses, the arguments of the
+                call are separated by spaces.
+                It means that there is no function call in that case.  </li>
+        </ul>
+
+        <p>Examples:</p>
+
+        <ul>
+                <li>
+                        <code>(expr a b)</code>
+                        becomes
+                        <code>(a b)</code>
+                </li>
+                <li>
+                        <code>(expr a b c)</code>
+                        becomes
+                        <code>(a (b c))</code>
+                        <i>(right associativity)</i>
+                </li>
+                <li>
+                        <code>(expr a(b c))</code>
+                        becomes
+                        <code>(a b c)</code>
+                </li>
+                <li>
+                        <code>(expr a(b) + c)</code>
+                        becomes
+                        <code>(+ (a b) c)</code>
+                </li>
+                <li>
+                        <code>(expr a((b c) d))</code>
+                        becomes
+                        <code>(a (b c) d)</code>
+                </li>
+                <li>
+                        <code>(expr a(b - c))</code>
+                        becomes
+                        <code>(a (- b c))</code>
+                </li>
+                <li>
+                        <code>(expr a(b (- c)))</code>
+                        becomes
+                        <code>(a (b (- c))</code>
+                </li>
+        </ul>
+</li>
+
+<li>
+        <p>Sub-expressions are expressions enclosed in parentheses.</p>
+
+        <p>Sub expressions are of 3 different types depending one the
+        context.</p>
+
+        <p>Sub expression are detailed <a href="#sub-expressions">below</a>.</p>
+</li>
+
+</ul>
+
+The syntax <code class="expr-keyword">expr</code> is not required to
+optimize expressions. It is only required to translate the expression
+(for example, <code>(expr + - 3)</code> should become <code>(+ (- 3))</code>
+even if it looks like being <code>-3</code>).</p>
+
+<h3 id="operator-types">Operator types</h3>
+
+<p>Types of operators that can be defined are:
+    <i>prefix</i>, <i>left</i>, <i>right</i>,
+    <i>list</i>, <i>comp</i>, <i>ternary</i>.</p>
+
+<p>Here is how it behaves when used:</p>
+
+<ul>
+  <li>
+    <i>prefix</i>
+    <p>Prefix operator for unary operation.</p>
+    <p><b><code>OPERATOR X</code></b> becomes
+         <b><code>(OPERATION X)</code></b>.</p>
+  </li>
+
+  <li>
+    <i>left</i>
+    <p>Infix operator for binary operation.</p>
+    <p><b><code>X OPERATOR Y</code></b> becomes
+         <b><code>(OPERATION X Y)</code></b>.</p>
+    <p>Left associative.</p>
+    <p><b><code>X OPERATOR Y OPERATOR Z</code></b> becomes
+         <b><code>(OPERATION (OPERATION X Y) Z)</code></b>.</p>
+  </li>
+
+  <li>
+    <i>right</i>
+    <p>Infix operator for binary operation.</p>
+    <p><b><code>X OPERATOR Y</code></b> becomes
+         <b><code>(OPERATION X Y)</code></b>.</p>
+    <p>Right associative.</p>
+    <p><b><code>X OPERATOR Y OPERATOR Z</code></b> becomes
+         <b><code>(OPERATION X (OPERATION Y Z))</code></b>.</p>
+  </li>
+
+  <li>
+    <i>list</i>
+    <p>Infix operator for list operation.</p>
+    <p><b><code>X OPERATOR Y [OPERATOR Z]...</code></b> becomes
+       <b><code>(OPERATION X Y Z...)</code></b>.</p>
+  </li>
+
+  <li>
+    <i>compare</i>
+    <p>Infix operator for compare operation.</p>
+    <p><b><code>X OPERATOR Y [OPERATOR Z]...</code></b> becomes
+       <b><code>(OPERATION X Y Z...)</code></b>.</p>
+    <p>Heterogenous comparison.</p>
+    <p><b><code>X COMP1 [Y COMP1]... Z COMP2 A [COMP2 B]...</code></b> becomes
+       <b><code>(let ((tmp Z)) (and (COMP1 X Y... tmp) (COMP2 tmp A B...)))</code></b>.</p>
+  </li>
+
+  <li>
+    <i>ternary</i>
+    <p>Pair of operators for ternary operation.</p>
+    <p><b><code>X FIRST-OPERATOR Y SECOND-OPERATOR Z</code></b> becomes
+         <b><code>(OPERATION X Y Z)</code></b>.</p>
+    <p>Case of predefined <i>... if ... else ...</i>.</p>
+    <p><b><code>X if Y else Z</code></b> becomes
+       <b><code>(if Y X Z)</code></b>.</p>
+  </li>
+</ul>
+
+<p>Theise type above can be used for defining new operators.
+See <a href="operator-definition">below</a> for details on defining or
+redefining operators for syntax <code class="expr-keyword">expr</code>.</p>
+
+<p>The below operators are of a type that can not be defined
+because they have a specialized implementation::</p>
+
+<ul>
+  <li>
+    <i>call</i>
+    <p>No operator for function call operation.</p>
+    <p><b><code>X Y</code></b> becomes
+       <b><code>((expr X) (expr-for-args Y))</code></b>.</p>
+    <p>Space separated arguments.</p>
+    <p><b><code>X (ARG1 ARG2 ...)</code></b> becomes
+       <b><code>((expr X) (expr ARG1) (expr ARG2) ...)</code></b>.</p>
+    <p>Right associative.</p>
+    <p><b><code>X Y Z</code></b> becomes
+       <b><code>(X (Y Z))</code></b>.</p>
+  </li>
+
+  <li>
+    <i>as</i>
+    <p>Special assignment within expression.</p>
+    <p><b><code>X as Y ... in Z</code></b> becomes
+       <b><code>(let-values (((Y ...) X)) Z)</code></b>.</p>
+  </li>
+</ul>
+
+<h3>Parentheses in expressions</h3>
+
+<p>Expressions can have sub-expressions in parentheses.</p>
+
+<p>It occurs in three cases.</p>
+
+<dl>
+  <dt>arguments</dt>
+  <dd>
+          <p>When argument of a call, spaces are interpreted as separation
+          of arguments.</p>
+          <p>Then <b><code>f (a b ...)</code></b> expands as
+          <b><code>((expr f) (expr a) (expr b) ...)</code></b>.</p>
+  </dd>
+
+  <dt>sub-expressions</dt>
+  <dd>
+        <p>Except if at the place of an argument of a call,
+        and except if made of only one sub-expression,
+        a sub-expression <b><code>(a ...)</code></b>
+        expands as <b><code>(expr a ...)</code></b>.
+        </p>
+  </dd>
+
+  <dt>escapes</dt>
+  <dd>
+        <p>Except if at the place of an argument of a call,
+        when a sub-expression only contains one sub-expression,
+        it expands to the inner sub-express, literaly,
+        literaly by this subexpression. Then <b><code>((a ...))</code></b>
+          becomes <b><code>(a ...)</code></b> without applying implicitely <b>expr</b>
+  to the enclosed subexpression.</p></dd>
+</dl>
+
+<h3 id="customize">Defining or redefining operators</h3>
+
+<p>It is possible to define or to redefine operators.
+Definition occurs when the operator is not already defined.
+Redefinition occurs when the operator is already defined, in that
+case, the new definition replaces the older one.</p>
+
+<p>Definition or redefinition set the priority of the
+operator as explained <a href="#priority">here</a>.</p>
+
+<p>Definition or redefinition are done using syntaxic helpers.
+These helpers are of two main types: basic or procedural.</p>
+
+<p>Basic helpers are:</p>
+
+<ul>
+
+        <li>
+                <p><b><code>(expr-set-prefix oper priority procname)</code></b></p>
+                <p>Tells to replace expressions <code>... oper a ...</code>
+                by <code>(procname a)</code>.</p>
+        </li>
+        <li>
+                <p><b><code>(expr-set-left-infix oper priority procname)</code></b></p>
+                <p>Tells to replace expressions <code>... a oper b oper c ...</code>
+                by <code>(procname (procname a b) c)</code>.</p>
+                <p>Applies left associativity.</p>
+        </li>
+        <li>
+                <p><b><code>(expr-set-right-infix oper priority procname)</code></b></p>
+                <p>Tells to replace expressions <code>... a oper b oper c ...</code>
+                by <code>(procname a (procname b c))</code>.</p>
+                <p>Applies right associativity.</p>
+        </li>
+        <li>
+                <p><b><code>(expr-set-list oper priority procname)</code></b></p>
+                <p>Tells to replace expressions <code>... a oper b oper c ...</code>
+                by <code>(procname a b c)</code>.</p>
+        </li>
+        <li>
+                <p><b><code>(expr-set-compare oper priority procname)</code></b></p>
+                <p>Tells to replace expressions <code>... a oper b oper c ...</code>
+                by <code>(procname a b c)</code>.</p>
+        </li>
+        <li>
+                <p><b><code>(expr-set-ternary oper1 oper2 priority procname)</code></b></p>
+                <p>Tells to replace expressions <code>... a oper1 b oper2 c ...</code>
+                by <code>(procname a b c)</code>.</p>
+        </li>
+</ul>
+
+<p>Procedural helpers are looking like the below definition
+(except that lambdas are not duplicated):</p>
+
+<ul>
+
+        <li>
+                <p><b><code>(expr-set-prefix oper priority (x) expr)</code></b></p>
+                <p>Tells to replace expressions <code>... oper a ...</code>
+                by <code>((lambda(x) expr) a)</code>.</p>
+        </li>
+        <li>
+                <p><b><code>(expr-set-left-infix oper priority (x y) expr)</code></b></p>
+                <p>Tells to replace expressions <code>... a oper b oper c ...</code>
+                by <code>((lambda(x y) expr) ((lambda(x y) expr) a b) c)</code>.</p>
+                <p>Applies left associativity.</p>
+        </li>
+        <li>
+                <p><b><code>(expr-set-right-infix oper priority (x y) expr)</code></b></p>
+                <p>Tells to replace expressions <code>... a oper b oper c ...</code>
+                by <code>((lambda(x y) expr) a ((lambda(x y) expr) b c))</code>.</p>
+                <p>Applies right associativity.</p>
+        </li>
+        <li>
+                <p><b><code>(expr-set-list oper priority x expr)</code></b></p>
+                <p>Tells to replace expressions <code>... a oper b oper c ...</code>
+                by <code>((lambda x expr) a b c)</code>.</p>
+        </li>
+        <li>
+                <p><b><code>(expr-set-compare oper priority x expr)</code></b></p>
+                <p>Tells to replace expressions <code>... a oper b oper c ...</code>
+                by <code>((lambda x expr) a b c)</code>.</p>
+        </li>
+        <li>
+                <p><b><code>(expr-set-ternary oper1 oper2 priority (x y z) expr)</code></b></p>
+                <p>Tells to replace expressions <code>... a oper1 b oper2 c ...</code>
+                by <code>((lambda(x y z) expr) a b c)</code>.</p>
+        </li>
+</ul>
+
+
+<h3 id="predefined-operators">Predefined operators</h3>
+
+<p>Here is the list of predefined operators for
+<code class="expr-keyword">expr</code>:</p>
 
 <table border="1">
 
@@ -161,6 +575,7 @@ requiring any <i>import</i> of any library.</p>
      <tr> <td> @.      </td> <td>left</td> <td>10</td>  <td> list-ref </td> </tr>
      <tr> <td> @@      </td> <td>left</td> <td>10</td>  <td> bytevector-u8-ref </td> </tr>
      <tr> <td> @       </td> <td>prefix</td> <td>10</td>  <td> unbox </td> </tr>
+     <tr> <td>         </td> <td>call</td> <td>10</td>  <td> function call </td> </tr>
      <tr> <td> **      </td> <td>left</td> <td>20</td>  <td> expt </td> </tr>
      <tr> <td> -       </td> <td>prefix</td> <td>30</td>  <td> - </td> </tr>
      <tr> <td> +       </td> <td>prefix</td> <td>30</td>  <td> + </td> </tr>
@@ -170,7 +585,6 @@ requiring any <i>import</i> of any library.</p>
      <tr> <td> /       </td> <td>list</td> <td>40</td>  <td> / </td> </tr>
      <tr> <td> \       </td> <td>left</td> <td>40</td>  <td> quotient </td> </tr>
      <tr> <td> %       </td> <td>left</td> <td>40</td>  <td> remainder </td> </tr>
-     <tr> <td>         </td> <td>func</td> <td>50</td>  <td> function call </td> </tr>
      <tr> <td> +       </td> <td>list</td> <td>50</td>  <td> + </td> </tr>
      <tr> <td> -       </td> <td>list</td> <td>50</td>  <td> - </td> </tr>
      <tr> <td> &lt;    </td> <td>comp</td> <td>80</td>  <td> &lt; </td> </tr>
@@ -187,8 +601,8 @@ requiring any <i>import</i> of any library.</p>
      <tr> <td> as in   </td> <td>as</td> <td>160</td>  <td> let-values </td> </tr>
 
      <tr> <td> ~       </td> <td>prefix</td> <td>30</td>  <td> biwise-not  </td> </tr>
-     <tr> <td> &lt;&lt;</td> <td>left</td> <td>60</td>   <td> arithmetic-shift </td> </tr>
-     <tr> <td> &gt;&gt;</td> <td>left</td> <td>60</td>   <td> arithmetic-shift - </td> </tr>
+     <tr> <td> &lt;&lt;</td> <td>left</td> <td>60</td>   <td> bitwise-arithmetic-shift-left </td> </tr>
+     <tr> <td> &gt;&gt;</td> <td>left</td> <td>60</td>   <td> bitwise-arithmetic-shift-right </td> </tr>
      <tr> <td> &amp;   </td> <td>list</td> <td>100</td>  <td> bitwise-and </td> </tr>
      <tr> <td> ^       </td> <td>list</td> <td>110</td>  <td> bitwise-xor </td> </tr>
      <tr> <td> :       </td> <td>list</td> <td>120</td>  <td> bitwise-ior </td> </tr>
@@ -215,7 +629,7 @@ requiring any <i>import</i> of any library.</p>
      <tr> <td> fx^     </td> <td>list</td> <td>110</td>  <td> fxxor </td> </tr>
      <tr> <td> fx:     </td> <td>list</td> <td>120</td>  <td> fxior </td> </tr>
 
-     <tr> <td> fx-     </td> <td>prefix</td> <td>30</td>  <td> fl- </td> </tr>
+     <tr> <td> fl-     </td> <td>prefix</td> <td>30</td>  <td> fl- </td> </tr>
      <tr> <td> fl*     </td> <td>left</td> <td>40</td>  <td> fl* </td> </tr>
      <tr> <td> fl/     </td> <td>left</td> <td>40</td>  <td> fl/ </td> </tr>
      <tr> <td> fl\     </td> <td>left</td> <td>40</td>  <td> flquotient </td> </tr>
@@ -231,109 +645,13 @@ requiring any <i>import</i> of any library.</p>
   </tbody>
 </table>
 
-<p>Types of operators are: prefix, left, list, comp, func, ternary.</p>
-
-<dl>
-  <dt>prefix</dt>
-  <dd><b>OPERATOR X</b> becomes
-      <b><code>(OPERATION X)</code></b>.</dd>
-
-  <dt>left</dt>
-  <dd><b>X OPERATOR Y</b> becomes
-      <b><code>(OPERATION X Y)</code></b>.</dd>
-
-  <dt>list</dt>
-  <dd><b>X OPERATOR Y [OPERATOR Z]...</b> becomes
-      <b><code>(OPERATION X Y Z...)</code></b>.</dd>
-
-  <dt>comp</dt>
-  <dd>
-    <p><b>X OPERATOR Y [OPERATOR Z]...</b> becomes
-       <b><code>(OPERATION X Y Z...)</code></b>.</p>
-    <p><b>X COMP1 [Y COMP1]... Z COMP2 A [COMP2 B]...</b> becomes
-       <b><code>(let ((tmp Z)) (and (COMP1 X Y... tmp) (COMP2 tmp A B...)))</code></b>.</p>
-  </dd>
-
-  <dt>func</dt>
-  <dd>
-    <p><b>X Y</b> becomes
-       <b><code>(X Y)</code></b>.</p>
-    <p><b>X Y Z</b> becomes
-       <b><code>(X (Y Z))</code></b> (right associativity).</p>
-  </dd>
-
-  <dt>ternary</dt>
-  <dd>
-    <p><b>X if Y else Z</b> becomes
-       <b><code>(if Y X Z)</code></b>.</p>
-  </dd>
-
-  <dt>as</dt>
-  <dd>
-    <p><b>X as Y ... in Z</b> becomes
-       <b><code>(let-values (((Y ...) X)) Z)</code></b>.</p>
-  </dd>
-</dl>
-
-<p>Expressions can also have sub-expression in parenthesis.
-In that case few cases are distinguished:</p>
-
-<dl>
-  <dt>arguments</dt>
-  <dd><p>When argument of a call, spaces are interpreted as separation of arguments.</p>
-  <p>Then <b><code>f (a b ...)</code></b> expands as
-  <b><code>((expr f) (expr a) (expr b) ...)</code></b>.</p></dd>
-
-  <dt>subexpression</dt>
-  <dd><p>When at the place of a term, the sub expression <b><code>(a ...)</code></b>
-	  expands as if replaced by <b><code>(expr a ...)</code></b>.</p></dd>
-
-  <dt>escape</dt>
-  <dd><p>When a subexpression only contains one subexpression, it is replaced
-  literaly by this subexpression. Then <b><code>((a ...))</code></b>
-  becomes <b><code>(a ...)</code></b> without applying implicitely <b>expr</b>
-  to the enclosed subexpression.</p></dd>
-</dl>
-
-<p>Application of the syntax <b>expr</b> should transform the expression
-to an equivalent scheme expression. It means that using <b>expr</b> has
-no runtime cost. It also means that <b>expr</b> is not required to
-optimize expressions. It is only required to translate the expression
-(for example, <code>(expr + - 3)</code> should become <code>(+ (- 3))</code>
-even if it looks like being <code>-3</code>).</p>
-
-<p>For example:</p>
-
-<pre><code>   (expr a + b + c &lt; d &lt;= x - y - z)</code></pre>
-
-<p>Should be translated to:</p>
-
-<pre><code>   (let ((tmp d)) (and (&lt; (+ a b c) tmp) (&lt;= tmp (- x y z))))</code></pre>
-
-<h2 id="to-be-discussed">TO BE DISCUSSED</h2>
-
-<p>The example implementation opens some doors:</p>
-
-<ul>
-  <li>Expansion of <code class="expr-keyword">expr</code> is parametrized
-      by the list <code>opdefs</code> that define operators.
-      The definition of <code class="expr-keyword">expr</code> is in
-      fact parametric. It opens the door to user defined operations.
-      What should be done of that? (see <code>define-expr-syntax</code>)
-      The answer depends on how it can be supported by scheme implementations.</li>
-  <li>Two obvious syntaxic keywords are added as example, <code>lambda-expr</code>
-      and <code>define-expr</code>. It can be ignored by the current srfi
-      specification because they so simple that it doesn't brings much value.</li>
-</ul>
-
-
 <h2 id="implementation">Implementation</h2>
 
-<p>Implementation of syntactic item <code class="expr-keyword">expr</code> can be made in many ways:
+<p>Implementations of <code class="expr-keyword">expr</code> can be made
 using standard Scheme macros, using implementation specific macros, or,
-using internals of implementation.</p>
+using internals of implementations.</p>
 
-<p>The sample implementation given for guile 3 use syntax-case.</p>
+<p>The sample implementation uses syntax-case. It works for Guile 3 and ChezScheme.</p>
 
 <a href="https://srfi.schemers.org/srfi-266/srfi-266.tgz">Source for the sample implementation.</a>
 
