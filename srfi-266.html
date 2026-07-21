@@ -147,7 +147,7 @@ using:</p>
 <code class="expr-keyword">expr-set-list</code>,
 <code class="expr-keyword">expr-set-compare</code>,
 <code class="expr-keyword">expr-set-ternary</code>
-that serve to define or redefine operators (see <a href="#customize">below</a>).<p>
+that serve to define or redefine operators (see <a href="#customize">below</a>).</p>
 
 <h3>The expr syntax</h3>
 
@@ -265,7 +265,7 @@ operators, calls and sub-expressions.</p>
                         becomes
                         <code>(+ (* a b) c)</code>
                 </li>
-</li>
+</ul>
 
 <li>
         <p>Calls are right associatives.</p>
@@ -337,7 +337,7 @@ operators, calls and sub-expressions.</p>
 
 </ul>
 
-The syntax <code class="expr-keyword">expr</code> is not required to
+<p>The syntax <code class="expr-keyword">expr</code> is not required to
 optimize expressions. It is only required to translate the expression
 (for example, <code>(expr + - 3)</code> should become <code>(+ (- 3))</code>
 even if it looks like being <code>-3</code>).</p>
