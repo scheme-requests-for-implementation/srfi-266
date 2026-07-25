@@ -117,6 +117,8 @@
         ((a compare-proc b compare-proc c)     (proc-compare a b c))
         ((1 ternary-name-1 2 ternary-name-2 3) (name-ternary 1 2 3))
         ((1 ternary-proc-1 2 ternary-proc-2 3) (proc-ternary 1 2 3))
+        ((1 ternary-syntax-1 #f ternary-syntax-2 2) (syntax-ternary 1 #f 2))
+        ((1 ternary-syntax-1 #t ternary-syntax-2 2) (syntax-ternary 1 #t 2))
    )
 
 ;--------------------------------------------------------
