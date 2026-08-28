@@ -483,6 +483,91 @@ because they have a specific implementation:</p>
         to the enclosed subexpression.</p></dd>
 </dl>
 
+<h3 id="predefined-operators">Predefined operators</h3>
+
+<p>The list of predefined operators for
+<code class="expr-keyword">expr</code> is given in the below table:</p>
+
+<table border="1">
+
+  <thead>
+    <tr> <th>operator</th> <th>type</th> <th>priority</th> <th>operation</th> </tr>
+  </thead>
+  <tbody>
+     <tr> <td> @       </td> <td>left</td> <td>10</td>  <td> vector-ref </td> </tr>
+     <tr> <td> @.      </td> <td>left</td> <td>10</td>  <td> list-ref </td> </tr>
+     <tr> <td> @@      </td> <td>left</td> <td>10</td>  <td> bytevector-u8-ref </td> </tr>
+     <tr> <td> @       </td> <td>prefix</td> <td>10</td>  <td> unbox </td> </tr>
+     <tr> <td>         </td> <td>call</td> <td>10</td>  <td> function call </td> </tr>
+     <tr> <td> **      </td> <td>left</td> <td>20</td>  <td> expt </td> </tr>
+     <tr> <td> -       </td> <td>prefix</td> <td>30</td>  <td> - </td> </tr>
+     <tr> <td> +       </td> <td>prefix</td> <td>30</td>  <td> + </td> </tr>
+     <tr> <td> not     </td> <td>prefix</td> <td>30</td>  <td> not </td> </tr>
+     <tr> <td> ?       </td> <td>prefix</td> <td>30</td>  <td> boolean --&gt; 0 or 1 </td> </tr>
+     <tr> <td> *       </td> <td>list</td> <td>40</td>  <td> * </td> </tr>
+     <tr> <td> /       </td> <td>list</td> <td>40</td>  <td> / </td> </tr>
+     <tr> <td> \       </td> <td>left</td> <td>40</td>  <td> quotient </td> </tr>
+     <tr> <td> %       </td> <td>left</td> <td>40</td>  <td> remainder </td> </tr>
+     <tr> <td> +       </td> <td>list</td> <td>50</td>  <td> + </td> </tr>
+     <tr> <td> -       </td> <td>list</td> <td>50</td>  <td> - </td> </tr>
+     <tr> <td> &lt;    </td> <td>comp</td> <td>80</td>  <td> &lt; </td> </tr>
+     <tr> <td> &gt;    </td> <td>comp</td> <td>80</td>  <td> &gt; </td> </tr>
+     <tr> <td> &lt;=   </td> <td>comp</td> <td>80</td>  <td> &lt;= </td> </tr>
+     <tr> <td> &gt;=   </td> <td>comp</td> <td>80</td>  <td> &gt;= </td> </tr>
+     <tr> <td> =       </td> <td>comp</td> <td>80</td>  <td> = </td> </tr>
+     <tr> <td> !=      </td> <td>left</td> <td>90</td>  <td> not =  </td> </tr>
+     <tr> <td> and     </td> <td>list</td> <td>130</td>  <td> and </td> </tr>
+     <tr> <td> or      </td> <td>list</td> <td>140</td>  <td> or </td> </tr>
+     <tr> <td> implies </td> <td>left</td> <td>150</td>  <td> implies </td> </tr>
+
+     <tr> <td> if else </td> <td>ternary</td> <td>160</td>  <td> if </td> </tr>
+     <tr> <td> as in   </td> <td>as</td> <td>160</td>  <td> let-values </td> </tr>
+
+     <tr> <td> ~       </td> <td>prefix</td> <td>30</td>  <td> bitwise-not  </td> </tr>
+     <tr> <td> &lt;&lt;</td> <td>left</td> <td>60</td>   <td> bitwise-arithmetic-shift-left </td> </tr>
+     <tr> <td> &gt;&gt;</td> <td>left</td> <td>60</td>   <td> bitwise-arithmetic-shift-right </td> </tr>
+     <tr> <td> &amp;   </td> <td>list</td> <td>100</td>  <td> bitwise-and </td> </tr>
+     <tr> <td> ^       </td> <td>list</td> <td>110</td>  <td> bitwise-xor </td> </tr>
+     <tr> <td> :       </td> <td>list</td> <td>120</td>  <td> bitwise-ior </td> </tr>
+     <tr> <td> ~&amp;  </td> <td>left</td> <td>100</td>  <td> bitwise-nand </td> </tr>
+     <tr> <td> ~^      </td> <td>left</td> <td>110</td>  <td> bitwise-eqv </td> </tr>
+     <tr> <td> ~:      </td> <td>left</td> <td>120</td>  <td> bitwise-nor </td> </tr>
+
+     <tr> <td> fx-     </td> <td>prefix</td> <td>30</td>  <td> fxneg </td> </tr>
+     <tr> <td> fx~     </td> <td>prefix</td> <td>30</td>  <td> fxnot </td> </tr>
+     <tr> <td> fx*     </td> <td>left</td> <td>40</td>  <td> fx* </td> </tr>
+     <tr> <td> fx\     </td> <td>left</td> <td>40</td>  <td> fxquotient </td> </tr>
+     <tr> <td> fx%     </td> <td>left</td> <td>40</td>  <td> fxremainder </td> </tr>
+     <tr> <td> fx+     </td> <td>left</td> <td>50</td>  <td> fx+ </td> </tr>
+     <tr> <td> fx-     </td> <td>left</td> <td>50</td>  <td> fx- </td> </tr>
+     <tr> <td> fx&lt;&lt;</td> <td>left</td> <td>60</td>  <td> fxarithmetic-shift-left </td> </tr>
+     <tr> <td> fx&gt;&gt;</td> <td>left</td> <td>60</td>  <td> fxarithmetic-shift-right </td> </tr>
+     <tr> <td> fx&lt;  </td> <td>comp</td> <td>80</td>  <td> fx&lt;? </td> </tr>
+     <tr> <td> fx&gt;  </td> <td>comp</td> <td>80</td>  <td> fx&gt;? </td> </tr>
+     <tr> <td> fx&lt;= </td> <td>comp</td> <td>80</td>  <td> fx&lt;=? </td> </tr>
+     <tr> <td> fx&gt;= </td> <td>comp</td> <td>80</td>  <td> fx&gt;=? </td> </tr>
+     <tr> <td> fx=     </td> <td>comp</td> <td>80</td>  <td> fx=?  </td> </tr>
+     <tr> <td> fx!=    </td> <td>left</td> <td>90</td>  <td> not fx=?  </td> </tr>
+     <tr> <td> fx&amp; </td> <td>list</td> <td>100</td>  <td> fxand </td> </tr>
+     <tr> <td> fx^     </td> <td>list</td> <td>110</td>  <td> fxxor </td> </tr>
+     <tr> <td> fx:     </td> <td>list</td> <td>120</td>  <td> fxior </td> </tr>
+
+     <tr> <td> fl-     </td> <td>prefix</td> <td>30</td>  <td> fl- </td> </tr>
+     <tr> <td> fl*     </td> <td>left</td> <td>40</td>  <td> fl* </td> </tr>
+     <tr> <td> fl/     </td> <td>left</td> <td>40</td>  <td> fl/ </td> </tr>
+     <tr> <td> fl\     </td> <td>left</td> <td>40</td>  <td> flquotient </td> </tr>
+     <tr> <td> fl%     </td> <td>left</td> <td>40</td>  <td> flremainder </td> </tr>
+     <tr> <td> fl+     </td> <td>left</td> <td>50</td>  <td> fl+ </td> </tr>
+     <tr> <td> fl-     </td> <td>left</td> <td>50</td>  <td> fl- </td> </tr>
+     <tr> <td> fl&lt;  </td> <td>comp</td> <td>80</td>  <td> fl&lt;? </td> </tr>
+     <tr> <td> fl&gt;  </td> <td>comp</td> <td>80</td>  <td> fl&gt;? </td> </tr>
+     <tr> <td> fl&lt;= </td> <td>comp</td> <td>80</td>  <td> fl&lt;=? </td> </tr>
+     <tr> <td> fl&gt;= </td> <td>comp</td> <td>80</td>  <td> fl&gt;=? </td> </tr>
+     <tr> <td> fl=     </td> <td>comp</td> <td>80</td>  <td> fl=? </td> </tr>
+     <tr> <td> fl!=    </td> <td>left</td> <td>90</td>  <td> not fl=? </td> </tr>
+  </tbody>
+</table>
+
 <h3 id="customize">Defining or redefining operators</h3>
 
 <p>It is possible to define or to redefine operators.
@@ -572,91 +657,6 @@ These helpers are of two main types: basic or procedural.</p>
 		<br/>by <code>((lambda(x y z) <b>expression</b>) a b c)</code>.</p>
         </li>
 </ul>
-
-<h3 id="predefined-operators">Predefined operators</h3>
-
-<p>The list of predefined operators for
-<code class="expr-keyword">expr</code> is given in the below table:</p>
-
-<table border="1">
-
-  <thead>
-    <tr> <th>operator</th> <th>type</th> <th>priority</th> <th>operation</th> </tr>
-  </thead>
-  <tbody>
-     <tr> <td> @       </td> <td>left</td> <td>10</td>  <td> vector-ref </td> </tr>
-     <tr> <td> @.      </td> <td>left</td> <td>10</td>  <td> list-ref </td> </tr>
-     <tr> <td> @@      </td> <td>left</td> <td>10</td>  <td> bytevector-u8-ref </td> </tr>
-     <tr> <td> @       </td> <td>prefix</td> <td>10</td>  <td> unbox </td> </tr>
-     <tr> <td>         </td> <td>call</td> <td>10</td>  <td> function call </td> </tr>
-     <tr> <td> **      </td> <td>left</td> <td>20</td>  <td> expt </td> </tr>
-     <tr> <td> -       </td> <td>prefix</td> <td>30</td>  <td> - </td> </tr>
-     <tr> <td> +       </td> <td>prefix</td> <td>30</td>  <td> + </td> </tr>
-     <tr> <td> not     </td> <td>prefix</td> <td>30</td>  <td> not </td> </tr>
-     <tr> <td> ?       </td> <td>prefix</td> <td>30</td>  <td> boolean --&gt; 0 or 1 </td> </tr>
-     <tr> <td> *       </td> <td>list</td> <td>40</td>  <td> * </td> </tr>
-     <tr> <td> /       </td> <td>list</td> <td>40</td>  <td> / </td> </tr>
-     <tr> <td> \       </td> <td>left</td> <td>40</td>  <td> quotient </td> </tr>
-     <tr> <td> %       </td> <td>left</td> <td>40</td>  <td> remainder </td> </tr>
-     <tr> <td> +       </td> <td>list</td> <td>50</td>  <td> + </td> </tr>
-     <tr> <td> -       </td> <td>list</td> <td>50</td>  <td> - </td> </tr>
-     <tr> <td> &lt;    </td> <td>comp</td> <td>80</td>  <td> &lt; </td> </tr>
-     <tr> <td> &gt;    </td> <td>comp</td> <td>80</td>  <td> &gt; </td> </tr>
-     <tr> <td> &lt;=   </td> <td>comp</td> <td>80</td>  <td> &lt;= </td> </tr>
-     <tr> <td> &gt;=   </td> <td>comp</td> <td>80</td>  <td> &gt;= </td> </tr>
-     <tr> <td> =       </td> <td>comp</td> <td>80</td>  <td> = </td> </tr>
-     <tr> <td> !=      </td> <td>left</td> <td>90</td>  <td> not =  </td> </tr>
-     <tr> <td> and     </td> <td>list</td> <td>130</td>  <td> and </td> </tr>
-     <tr> <td> or      </td> <td>list</td> <td>140</td>  <td> or </td> </tr>
-     <tr> <td> implies </td> <td>left</td> <td>150</td>  <td> implies </td> </tr>
-
-     <tr> <td> if else </td> <td>ternary</td> <td>160</td>  <td> if </td> </tr>
-     <tr> <td> as in   </td> <td>as</td> <td>160</td>  <td> let-values </td> </tr>
-
-     <tr> <td> ~       </td> <td>prefix</td> <td>30</td>  <td> bitwise-not  </td> </tr>
-     <tr> <td> &lt;&lt;</td> <td>left</td> <td>60</td>   <td> bitwise-arithmetic-shift-left </td> </tr>
-     <tr> <td> &gt;&gt;</td> <td>left</td> <td>60</td>   <td> bitwise-arithmetic-shift-right </td> </tr>
-     <tr> <td> &amp;   </td> <td>list</td> <td>100</td>  <td> bitwise-and </td> </tr>
-     <tr> <td> ^       </td> <td>list</td> <td>110</td>  <td> bitwise-xor </td> </tr>
-     <tr> <td> :       </td> <td>list</td> <td>120</td>  <td> bitwise-ior </td> </tr>
-     <tr> <td> ~&amp;  </td> <td>left</td> <td>100</td>  <td> bitwise-nand </td> </tr>
-     <tr> <td> ~^      </td> <td>left</td> <td>110</td>  <td> bitwise-eqv </td> </tr>
-     <tr> <td> ~:      </td> <td>left</td> <td>120</td>  <td> bitwise-nor </td> </tr>
-
-     <tr> <td> fx-     </td> <td>prefix</td> <td>30</td>  <td> fxneg </td> </tr>
-     <tr> <td> fx~     </td> <td>prefix</td> <td>30</td>  <td> fxnot </td> </tr>
-     <tr> <td> fx*     </td> <td>left</td> <td>40</td>  <td> fx* </td> </tr>
-     <tr> <td> fx\     </td> <td>left</td> <td>40</td>  <td> fxquotient </td> </tr>
-     <tr> <td> fx%     </td> <td>left</td> <td>40</td>  <td> fxremainder </td> </tr>
-     <tr> <td> fx+     </td> <td>left</td> <td>50</td>  <td> fx+ </td> </tr>
-     <tr> <td> fx-     </td> <td>left</td> <td>50</td>  <td> fx- </td> </tr>
-     <tr> <td> fx&lt;&lt;</td> <td>left</td> <td>60</td>  <td> fxarithmetic-shift-left </td> </tr>
-     <tr> <td> fx&gt;&gt;</td> <td>left</td> <td>60</td>  <td> fxarithmetic-shift-right </td> </tr>
-     <tr> <td> fx&lt;  </td> <td>comp</td> <td>80</td>  <td> fx&lt;? </td> </tr>
-     <tr> <td> fx&gt;  </td> <td>comp</td> <td>80</td>  <td> fx&gt;? </td> </tr>
-     <tr> <td> fx&lt;= </td> <td>comp</td> <td>80</td>  <td> fx&lt;=? </td> </tr>
-     <tr> <td> fx&gt;= </td> <td>comp</td> <td>80</td>  <td> fx&gt;=? </td> </tr>
-     <tr> <td> fx=     </td> <td>comp</td> <td>80</td>  <td> fx=?  </td> </tr>
-     <tr> <td> fx!=    </td> <td>left</td> <td>90</td>  <td> not fx=?  </td> </tr>
-     <tr> <td> fx&amp; </td> <td>list</td> <td>100</td>  <td> fxand </td> </tr>
-     <tr> <td> fx^     </td> <td>list</td> <td>110</td>  <td> fxxor </td> </tr>
-     <tr> <td> fx:     </td> <td>list</td> <td>120</td>  <td> fxior </td> </tr>
-
-     <tr> <td> fl-     </td> <td>prefix</td> <td>30</td>  <td> fl- </td> </tr>
-     <tr> <td> fl*     </td> <td>left</td> <td>40</td>  <td> fl* </td> </tr>
-     <tr> <td> fl/     </td> <td>left</td> <td>40</td>  <td> fl/ </td> </tr>
-     <tr> <td> fl\     </td> <td>left</td> <td>40</td>  <td> flquotient </td> </tr>
-     <tr> <td> fl%     </td> <td>left</td> <td>40</td>  <td> flremainder </td> </tr>
-     <tr> <td> fl+     </td> <td>left</td> <td>50</td>  <td> fl+ </td> </tr>
-     <tr> <td> fl-     </td> <td>left</td> <td>50</td>  <td> fl- </td> </tr>
-     <tr> <td> fl&lt;  </td> <td>comp</td> <td>80</td>  <td> fl&lt;? </td> </tr>
-     <tr> <td> fl&gt;  </td> <td>comp</td> <td>80</td>  <td> fl&gt;? </td> </tr>
-     <tr> <td> fl&lt;= </td> <td>comp</td> <td>80</td>  <td> fl&lt;=? </td> </tr>
-     <tr> <td> fl&gt;= </td> <td>comp</td> <td>80</td>  <td> fl&gt;=? </td> </tr>
-     <tr> <td> fl=     </td> <td>comp</td> <td>80</td>  <td> fl=? </td> </tr>
-     <tr> <td> fl!=    </td> <td>left</td> <td>90</td>  <td> not fl=? </td> </tr>
-  </tbody>
-</table>
 
 
 <h2 id="implementation">Implementation</h2>
