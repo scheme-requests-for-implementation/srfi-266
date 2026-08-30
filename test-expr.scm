@@ -32,7 +32,16 @@
   (syntax-rules ()
     ((_ ((ex ...) re) ...)
       (begin
-          (test-equal (expr ex ...) re) ... ))))
+	 (let ((cur (expr ex ...))
+	       (exd re))
+           (test-equal '(ex ...) cur exd)
+           (when #t
+             (display '(ex ...))
+	     (display "  => ")
+	     (display exd)
+	     (newline)
+	     (newline))
+          ) ... ))))
 
 (define-syntax test-set
   (syntax-rules ()
@@ -83,6 +92,7 @@
 (define (proc-compare . x) (apply + 9100000 x))
 (define (name-ternary x y z) (+ x y z 100))
 (define (proc-ternary x y z) (+ x y z 200))
+(define-syntax syntax-ternary (syntax-rules () ((_ u v w) (if v u w))))
 
 ;--------------------------------------------------------
 
@@ -98,6 +108,7 @@
 (expr-set-compare compare-proc 40 a (proc-compare . a))
 (expr-set-ternary ternary-name-1 ternary-name-2 200 name-ternary)
 (expr-set-ternary ternary-proc-1 ternary-proc-2 200 (a b c) (proc-ternary a b c))
+(expr-set-ternary ternary-syntax-1 ternary-syntax-2 200 (a b c) (syntax-ternary a b c))
 
 ;--------------------------------------------------------
 

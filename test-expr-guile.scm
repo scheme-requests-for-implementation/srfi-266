@@ -55,9 +55,8 @@
          (rx (rename-temporaries rx))) ; replace random temporaries by deterministc ones
     ; testing
     (test-equal e r rx)
-    (when #f
+    (when #t
       (display ex)
-      (newline)
       (display "  => ")
       (display rx)
       (newline)
@@ -96,6 +95,7 @@
 (expr-set-compare compare-proc 40 a (proc-compare . a))
 (expr-set-ternary ternary-name-1 ternary-name-2 200 name-ternary)
 (expr-set-ternary ternary-proc-1 ternary-proc-2 200 (a b c) (proc-ternary a b c))
+(expr-set-ternary ternary-syntax-1 ternary-syntax-2 200 (a b c) (syntax-ternary a b c))
 
 ;--------------------------------------------------------
 
