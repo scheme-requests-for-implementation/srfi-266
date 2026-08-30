@@ -48,6 +48,24 @@ First of all, it is never ambiguous, and it does not need to define
 any operator priority. Conversely, syntax <code class="expr-keyword">expr</code>
 introduces a kind of ambiguity that cannot be removed.</p>
 
+<h2 id="toc">Table of contents</h2>
+<ul>
+  <li><a href="#rationale">Rationale</a></li>
+  <li>
+    <a href="#specification">Specification</a>
+    <ul>
+      <li><a href="#the-expr-syntax">The expr syntax</a></li>
+      <li><a href="#operator-types">Operator types</a></li>
+      <li><a href="#parentheses-in-expressions">Parentheses in expressions</a></li>
+      <li><a href="#predefined-operators">Predefined operators</a></li>
+      <li><a href="#customize">Defining or redefining operators</a></li>
+    </ul>
+  </li>
+  <li><a href="#implementation">Implementation</a></li>
+  <li><a href="#acknowledgements">Acknowledgements</a></li>
+  <li><a href="#copyright">Copyright</a></li>
+</ul>
+
 <h2 id="rationale">Rationale</h2>
 
 <p>Scheme programmers expressing arithmetic expressions see all over
@@ -154,7 +172,7 @@ using:</p>
 serve to define or redefine operators
 as described <a href="#customize">below</a>.</p>
 
-<h3>The expr syntax</h3>
+<h3 id="the-expr-syntax">The expr syntax</h3>
 
 <p>The syntactic item <code class="expr-keyword">expr</code> should be followed by
 an expression <b><code>E ...</code></b>:</p>
@@ -449,7 +467,7 @@ because they have a specific implementation:</p>
   </li>
 </ul>
 
-<h3>Parentheses in expressions</h3>
+<h3 id="parentheses-in-expressions">Parentheses in expressions</h3>
 
 <p id="sub-expressions">Expressions can have subexpressions in
 parentheses.  They occur in three cases.</p>
