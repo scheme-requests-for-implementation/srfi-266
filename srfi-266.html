@@ -240,7 +240,7 @@ operators, calls and subexpressions.</p>
   <a href="#operators">operators</a> defined by
   <code class="expr-keyword">expr</code>.</p>
 
-  <p>Each operator is associated to an operation wich is a procedure or a syntax.
+  <p>Each operator is associated to an operation which is a procedure or a syntax.
   The behaviour of syntax <code class="expr-keyword">expr</code> is to translate
   usage of operators to calls to operations. This is done using rules
   of replacement involving the type of the operator and its priority.</p>
@@ -544,18 +544,18 @@ even if it looks like it should be <code>-3</code>).</p>
 
 <p>Previous draft versions of this SRFI were using symbols for operators,
 not the binding of identifiers. This has been rejected because it was
-breaking solid fundation. The implication is that I was not more able
+breaking solid foundation. The implication is that I was not more able
 to provide an implementation allowing to add operators or to redefine
 existing operators.</p>
 
 <p>The abitlity to add operators to <code class="expr-keyword">expr</code>
-was ask in the discussion and I'm sad to give up with it. So I hope
+was requested in the discussion, and I'm sad to give up on it. So I hope
 that a later proposal will extend that SRFI with this feature,
 something like <code>(srfi srfi-266 extend)</code> perhaps.</p>
 
 <p>It appears that <code>identifier-property</code> can allow
 to implement that SRFI and solve the extension issue.
-Halas, during my implementation trials, it can't be done
+Alas, during my implementation trials, it can't be done
 using Chez Scheme because symbols for syntax can't be used
 as identifier neither as target nor as property.</p>
 
