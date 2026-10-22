@@ -303,12 +303,12 @@ operators, calls and subexpressions.</p>
     but is not a prefix operator.</li>
 
     <li>The <i>argument(s)</i> are following the <i>callee</i> and each argument
-    is a single subexpression.</li>
+    is a single subexpression.
 
-    <p>When a <i>callee</i> has no argument, it must be followed by the empty list.</p>
+      <p>When a <i>callee</i> has no argument, it must be followed by the empty list.</p>
 
-    <p>When a <i>callee</i> has <b>N</b> argument (with <b>N</b> &ge; 1), it must be
-    followed by <b>N</b> subexpression(s).</p>
+      <p>When a <i>callee</i> has <b>N</b> argument (with <b>N</b> &ge; 1), it must be
+    followed by <b>N</b> subexpression(s).</p></li>
   </ul>
 
   <p>Examples:</p>
@@ -449,7 +449,7 @@ even if it looks like it should be <code>-3</code>).</p>
   <dd>
     <p>When a subexpression only contains one list,
     it expands to that inner list literally, without parsing.</p>
-    </p>In other words, <b><code>((a ...))</code></b>
+    <p>In other words, <b><code>((a ...))</code></b>
     becomes <b><code>(a ...)</code></b> without applying <b>expr</b>
     to the enclosed list.</p>
   </dd>
