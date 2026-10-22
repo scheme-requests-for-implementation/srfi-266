@@ -4,27 +4,18 @@
 ; SRFI-266 demo by José Bollo, 2026
 
 (import
-  (scheme base)
   (srfi srfi-64)
+  (srfi srfi-11)
   (srfi srfi-111)
-)
+  (rnrs arithmetic fixnums (6))
+  (rnrs arithmetic flonums (6))
+  (rnrs arithmetic bitwise (6)))
 
-(cond-expand
-  (guile
-    (import
-            (rnrs arithmetic fixnums (6))
-            (rnrs arithmetic flonums (6))
-            (rnrs arithmetic bitwise (6))))
-  (else
-    (import
-            (srfi srfi-143)
-            (srfi srfi-144)
-            (srfi srfi-151)))
-)
+(set! test-log-to-file #f)
 
 ;--------------------------------------------------------
 
-(include "srfi/expr-impl.scm")
+(import (srfi srfi-266))
 
 ;--------------------------------------------------------
 
@@ -32,15 +23,15 @@
   (syntax-rules ()
     ((_ ((ex ...) re) ...)
       (begin
-	 (let ((cur (expr ex ...))
-	       (exd re))
+         (let ((cur (expr ex ...))
+               (exd re))
            (test-equal '(ex ...) cur exd)
            (when #t
              (display '(ex ...))
-	     (display "  => ")
-	     (display exd)
-	     (newline)
-	     (newline))
+             (display "  => ")
+             (display exd)
+             (newline)
+             (newline))
           ) ... ))))
 
 (define-syntax test-set
@@ -77,38 +68,10 @@
 (define B (box 53))
 (define (ff1 p x) (* 103 (p x)))
 (define dx 0.000005)
-(define x 1)
+(set! x 1)
 (define (g x) (- (* x x) 1))
 (define (deriv p) (lambda (x) (/ (- (p (+ x dx)) (p x)) dx)))
-(define (name-prefix x) (+ x 1000000))
-(define (proc-prefix x) (+ x 2000000))
-(define (name-left x y) (+ x y 3000000))
-(define (proc-left x y) (+ x y 4000000))
-(define (name-right x y) (+ x y 5000000))
-(define (proc-right x y) (+ x y 6000000))
-(define (name-list . x) (apply + 7000000 x))
-(define (proc-list . x) (apply + 8000000 x))
-(define (name-compare . x) (apply + 9000000 x))
-(define (proc-compare . x) (apply + 9100000 x))
-(define (name-ternary x y z) (+ x y z 100))
-(define (proc-ternary x y z) (+ x y z 200))
-(define-syntax syntax-ternary (syntax-rules () ((_ u v w) (if v u w))))
-
-;--------------------------------------------------------
-
-(expr-set-prefix prefix-name 10 name-prefix)
-(expr-set-prefix prefix-proc 10 (a) (proc-prefix a))
-(expr-set-left-infix left-name 50 name-left)
-(expr-set-left-infix left-proc 50 (u v) (proc-left u v))
-(expr-set-right-infix right-name 50 name-right)
-(expr-set-right-infix right-proc 50 (u v) (proc-right u v))
-(expr-set-list list-name 40 name-list)
-(expr-set-list list-proc 40 a (proc-list . a))
-(expr-set-compare compare-name 40 name-compare)
-(expr-set-compare compare-proc 40 a (proc-compare . a))
-(expr-set-ternary ternary-name-1 ternary-name-2 200 name-ternary)
-(expr-set-ternary ternary-proc-1 ternary-proc-2 200 (a b c) (proc-ternary a b c))
-(expr-set-ternary ternary-syntax-1 ternary-syntax-2 200 (a b c) (syntax-ternary a b c))
+(define (square x) (* x x))
 
 ;--------------------------------------------------------
 

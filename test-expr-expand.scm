@@ -3,11 +3,20 @@
 ; SPDX-License-Identifier: MIT
 ; SRFI-266 demo by José Bollo, 2026
 
-(include "srfi/expr-impl.scm")
+(import
+  (language tree-il)
+  (srfi srfi-64)
+  (srfi srfi-11)
+  (srfi srfi-111)
+  (rnrs arithmetic fixnums (6))
+  (rnrs arithmetic flonums (6))
+  (rnrs arithmetic bitwise (6)))
 
-(use-modules
-  (language tree-il) ; specific to GUILE
-  (srfi srfi-64))
+(set! test-log-to-file #f)
+
+;--------------------------------------------------------
+
+(import (srfi srfi-266))
 
 ;--------------------------------------------------------
 ; test if a symbol matches a temporary name
@@ -31,6 +40,8 @@
                    (symb  (string->symbol name))
                    (memo  (cons item symb)))
               (cont symb (cons memo tmps))))))
+      ((and (pair? item) (eqv? '@@ (car item)))
+        (cont (caddr item) tmps))
       ((pair? item)
         (rt (car item) tmps
             (lambda (item-car tmps)
@@ -80,22 +91,6 @@
         (test-one-expr 'item) ...
         (test-end title)
         (newline)))))
-
-;--------------------------------------------------------
-
-(expr-set-prefix prefix-name 10 name-prefix)
-(expr-set-prefix prefix-proc 10 (a) (proc-prefix a))
-(expr-set-left-infix left-name 50 name-left)
-(expr-set-left-infix left-proc 50 (u v) (proc-left u v))
-(expr-set-right-infix right-name 50 name-right)
-(expr-set-right-infix right-proc 50 (u v) (proc-right u v))
-(expr-set-list list-name 40 name-list)
-(expr-set-list list-proc 40 a (proc-list . a))
-(expr-set-compare compare-name 40 name-compare)
-(expr-set-compare compare-proc 40 a (proc-compare . a))
-(expr-set-ternary ternary-name-1 ternary-name-2 200 name-ternary)
-(expr-set-ternary ternary-proc-1 ternary-proc-2 200 (a b c) (proc-ternary a b c))
-(expr-set-ternary ternary-syntax-1 ternary-syntax-2 200 (a b c) (syntax-ternary a b c))
 
 ;--------------------------------------------------------
 
